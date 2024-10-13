@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import MaterialItem from '@/components/materials/MaterialItem.vue'
+import MaterialItem from '@/components/Materials/MaterialItem.vue'
 
 const props = defineProps({
   materials: {

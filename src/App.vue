@@ -80,7 +80,7 @@ const isHomePage = computed(() => {
   --button-color: #8c7a64;
   --hover-color: #a08f77;
 
-  --columns-large: 5;
+  --columns-large: 4;
   --columns-medium: 3;
   --columns-small: 2;
   --gap: 10px;
@@ -88,6 +88,7 @@ const isHomePage = computed(() => {
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 #app {
