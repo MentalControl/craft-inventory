@@ -114,7 +114,7 @@ const isHomePage = computed(() => {
 
 nav {
   width: 100%;
-  max-width: 70px;
+  max-width: 80px;
   height: 100dvh;
   padding-inline: 10px;
   display: flex;
