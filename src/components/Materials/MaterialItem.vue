@@ -96,13 +96,7 @@ li {
 }
 .material {
   &_quantity {
-    padding: 10px;
     cursor: pointer;
-    border-radius: 20%;
-    transition: box-shadow 0.3s ease;
-    &:hover {
-      box-shadow: 2px 2px 20px var(--accent-color);
-    }
   }
   &_edit {
     display: flex;

@@ -132,8 +132,8 @@ const updateMaterial = ({ id, newQuantity, newUnit }) => {
       flex: 0 1 calc((100% / var(--columns-large)) - var(--gap));
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 10px;
+      gap: 20px;
+      padding: 14px 10px;
       border: 1px solid var(--accent-color);
       border-radius: 5px;
       box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
