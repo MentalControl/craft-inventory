@@ -1,0 +1,49 @@
+<template>
+  <div class="accordion-item">
+    <div class="accordion-header" @click="$emit('toggleCategory', category)">
+      <h3>{{ category }} ({{ materials.length }})</h3>
+      <select @change="$emit('changeMaterialSort', $event)" @click.stop>
+        <option selected disabled>Сортировка крупиц!</option>
+        <option value="quantity-asc">От мелких кусков к целым залежам!</option>
+        <option value="quantity-desc">От величественных гор к крупицам!</option>
+      </select>
+      <span class="accordion-icon" :class="{ opened: isOpen }"> 🠟 </span>
+    </div>
+    <transition name="accordion">
+      <div v-if="isOpen" class="accordion-content">
+        <MaterialsList
+          :materials="materials"
+          :unitOptions="unitOptions"
+          @remove="$emit('removeMaterial', $event)"
+        />
+      </div>
+    </transition>
+  </div>
+</template>
+
+<script setup>
+import MaterialsList from './MaterialsList.vue'
+
+defineProps({
+  category: {
+    type: String,
+    required: true
+  },
+  materials: {
+    type: Array,
+    required: true
+  },
+  isOpen: {
+    type: Boolean,
+    required: true
+  },
+  unitOptions: {
+    type: Array,
+    required: true
+  }
+})
+
+defineEmits(['toggleCategory', 'changeMaterialSort', 'removeMaterial'])
+</script>
+
+<style></style>
