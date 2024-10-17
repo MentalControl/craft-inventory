@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import AuthComp from '@/components/AuthComp.vue'
 
 const title = ref('Хроники Складских Деяний')
 const description = ref(
@@ -13,6 +14,7 @@ const description = ref(
       <h1>{{ title }}</h1>
       <p v-html="description"></p>
     </header>
+    <AuthComp />
   </div>
 </template>
 
