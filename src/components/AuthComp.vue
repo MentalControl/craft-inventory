@@ -2,14 +2,12 @@
 import { ref } from 'vue'
 import { auth } from '../firebase'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
-import { doc, getFirestore, setDoc } from 'firebase/firestore'
 import { useUserStore } from '@/store/userStore' // Импортируем store
 
 const email = ref('')
 const password = ref('')
 const isLogin = ref(true)
 const userStore = useUserStore() // Доступ к store
-const db = getFirestore()
 
 const handleSubmit = async () => {
   try {
@@ -19,11 +17,6 @@ const handleSubmit = async () => {
     } else {
       const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value)
       userStore.setUser(userCredential.user) // Устанавливаем пользователя в store
-
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        email: userCredential.user.email,
-        createdAt: new Date()
-      })
     }
   } catch (error) {
     console.error('Authentication error:', error.message)
