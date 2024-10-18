@@ -1,11 +1,32 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useUserStore } from './store/userStore'
+import { auth } from './firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 import MenuItem from '@/components/pages/MenuItem.vue'
 const route = useRoute()
 
 const isHomePage = computed(() => {
   return route.path === '/'
+})
+
+const userStore = useUserStore()
+
+onMounted(() => {
+  // Добавляем слушатель состояния аутентификации
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // Если пользователь авторизован, сохраняем данные пользователя в Pinia
+      userStore.setUser(user)
+    } else {
+      // Если пользователь не авторизован, очищаем состояние
+      userStore.clearUser()
+    }
+    // Вызываем метод для завершения загрузки
+    userStore.loading = false
+  })
+  userStore.initAuthState()
 })
 </script>
 
@@ -29,7 +50,7 @@ const isHomePage = computed(() => {
           ></path>
         </svg>
       </MenuItem>
-      <MenuItem to="/materials">
+      <MenuItem v-if="userStore.user" to="/materials">
         <svg
           viewBox="0 0 512 512"
           xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +62,7 @@ const isHomePage = computed(() => {
           ></path>
         </svg>
       </MenuItem>
-      <MenuItem to="/products">
+      <MenuItem v-if="userStore.user" to="/products">
         <svg
           fill="#000000"
           version="1.1"
