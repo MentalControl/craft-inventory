@@ -22,7 +22,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['materialAdded'])
-
 const materialStore = useMaterialStore()
 
 // Новый Материал для добавления
@@ -42,23 +41,25 @@ function closeDialog() {
 }
 
 // Добавление нового материала
-function addMaterial() {
-  const newId = Math.max(...materialStore.materials.map((m) => m.id), 0) + 1
-  const materialToAdd = {
-    id: newId,
-    name: newMaterial.value.name,
-    quantity: newMaterial.value.quantity,
-    unit: newMaterial.value.unit,
-    category: newMaterial.value.category
-  }
-  materialStore.addMaterial(materialToAdd)
-  emit('materialAdded', materialToAdd)
+async function addMaterial() {
+  try {
+    await materialStore.addMaterial({
+      name: newMaterial.value.name,
+      quantity: newMaterial.value.quantity,
+      unit: newMaterial.value.unit,
+      category: newMaterial.value.category
+    })
 
-  newMaterial.value = {
-    name: '',
-    quantity: 0,
-    unit: props.unitOptions[1],
-    category: props.categoryOptions[0]
+    emit('materialAdded', newMaterial.value)
+
+    newMaterial.value = {
+      name: '',
+      quantity: 0,
+      unit: props.unitOptions[0],
+      category: props.categoryOptions[0]
+    }
+  } catch (error) {
+    console.error('Error adding material: ', error)
   }
 }
 defineExpose({ openDialog })

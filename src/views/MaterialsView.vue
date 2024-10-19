@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMaterialStore } from '@/store/index.js'
 import { useMaterialSort } from '@/composables/useMaterialSort'
@@ -10,6 +10,7 @@ import AddMaterialForm from '@/components/Forms/AddMaterialForm.vue'
 import PageHeader from '@/components/pages/PageHeader.vue'
 import CategoryList from '@/components/Materials/CategoryList.vue'
 import SearchMaterials from '@/components/Materials/SearchMaterials.vue'
+import csvImport from '@/components/csvImport.vue'
 
 const TITLE = 'Великие Запасы Материалов'
 const DESCRIPTION = `Материалы — кровь и камень нашего братства! Добавляйте новые материалы, выбирайте нужные из наших несметных запасов и сортируйте по категориям.
@@ -46,10 +47,19 @@ const removeMaterial = (id) => {
   materials.value = materials.value.filter((material) => material.id !== id)
 }
 
-const updateMaterial = ({ id, newQuantity, newUnit }) => {
-  const material = materials.value.find((mat) => mat.id === id)
-  if (material) Object.assign(material, { quantity: newQuantity, unit: newUnit })
+const updateMaterial = async ({ id, newQuantity, newUnit }) => {
+  try {
+    await materialStore.updateMaterial({ id, newQuantity, newUnit })
+    const material = materials.value.find((mat) => mat.id === id)
+    if (material) Object.assign(material, { quantity: newQuantity, unit: newUnit })
+  } catch (error) {
+    console.error('Error updating material:', error)
+  }
 }
+
+onMounted(async () => {
+  materialStore.subToMaterials()
+})
 </script>
 
 <template>
@@ -61,6 +71,7 @@ const updateMaterial = ({ id, newQuantity, newUnit }) => {
   />
   <div class="materials">
     <div class="materials__content">
+      <csvImport />
       <SearchMaterials
         :materials="filteredMaterials"
         :unitOptions="unitOptions"
