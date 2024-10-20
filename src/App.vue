@@ -135,7 +135,7 @@ onMounted(() => {
 
 nav {
   width: 100%;
-  max-width: 80px;
+  max-width: 60px;
   height: 100dvh;
   padding-inline: 10px;
   display: flex;
@@ -147,7 +147,7 @@ nav {
     img {
       width: 100%;
       max-width: 100%;
-      height: 130px;
+      height: auto;
     }
   }
   .links {
