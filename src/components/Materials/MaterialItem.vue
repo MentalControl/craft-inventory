@@ -1,6 +1,6 @@
 <template>
   <li class="materials-list__item">
-    <span v-if="!isEditing">
+    <span class="material_item" v-if="!isEditing">
       {{ material.name }}:
       <span class="material_quantity" @click="enableEditing">
         {{ material.quantity }} {{ material.unit }}

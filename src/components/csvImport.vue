@@ -1,17 +1,3 @@
-<template>
-  <div>
-    <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" />
-    <button @click="importCSV">Импортировать CSV</button>
-
-    <!-- Затемнение и полоса прогресса -->
-    <div v-if="isLoading" class="overlay">
-      <div class="progress-bar">
-        <div class="progress" :style="{ width: progress + '%' }"></div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref } from 'vue'
 import Papa from 'papaparse'
@@ -95,7 +81,32 @@ const importCSV = async () => {
 }
 </script>
 
+<template>
+  <div class="import">
+    <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" />
+    <button @click="importCSV">Импортировать CSV</button>
+
+    <!-- Затемнение и полоса прогресса -->
+    <div v-if="isLoading" class="overlay">
+      <div class="progress-bar">
+        <div class="progress" :style="{ width: progress + '%' }"></div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <style lang="scss" scoped>
+.import {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  input {
+    margin-bottom: 0;
+  }
+  button {
+    max-width: 200px;
+  }
+}
 .overlay {
   position: fixed;
   top: 0;

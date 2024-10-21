@@ -140,7 +140,7 @@ onMounted(async () => {
     gap: var(--gap);
 
     &__item {
-      flex: 0 1 calc((100% / var(--columns-large)) - var(--gap));
+      flex: 0 1 calc((100% / var(--columns-x-large)) - var(--gap));
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -148,7 +148,9 @@ onMounted(async () => {
       border: 1px solid var(--accent-color);
       border-radius: 5px;
       box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-
+      @media (max-width: 1135px) {
+        flex: 0 1 calc((100% / var(--columns-large)) - var(--gap));
+      }
       @media (max-width: 900px) {
         flex: 0 1 calc((100% / var(--columns-medium)) - var(--gap));
       }

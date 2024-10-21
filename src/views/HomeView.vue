@@ -15,7 +15,7 @@ const userStore = useUserStore()
 <template>
   <div class="home">
     <header class="content-title">
-      <div>
+      <div class="top-header">
         <h1>{{ title }}</h1>
         <!-- Показываем кнопку выхода, если пользователь авторизован -->
         <UserButton v-if="userStore.user" />
@@ -31,7 +31,7 @@ const userStore = useUserStore()
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
   border-left-color: #ffdc3e;

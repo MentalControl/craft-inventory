@@ -1,13 +1,3 @@
-<template>
-  <header class="content-title">
-    <div class="top-header">
-      <h1>{{ title }}</h1>
-      <button @click="$emit('openDialog')">{{ buttonText }}</button>
-    </div>
-    <p>{{ description }}</p>
-  </header>
-</template>
-
 <script setup>
 defineProps({
   title: {
@@ -24,6 +14,16 @@ defineProps({
   }
 })
 </script>
+
+<template>
+  <header class="content-title">
+    <div class="top-header">
+      <h1>{{ title }}</h1>
+      <button @click="$emit('openDialog')">{{ buttonText }}</button>
+    </div>
+    <p>{{ description }}</p>
+  </header>
+</template>
 
 <style lang="scss">
 .content-title {

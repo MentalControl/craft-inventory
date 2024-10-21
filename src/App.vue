@@ -101,9 +101,10 @@ onMounted(() => {
   --button-color: #8c7a64;
   --hover-color: #a08f77;
 
-  --columns-large: 4;
-  --columns-medium: 3;
-  --columns-small: 2;
+  --columns-x-large: 4;
+  --columns-large: 3;
+  --columns-medium: 2;
+  --columns-small: 1;
   --gap: 10px;
 }
 * {
@@ -211,7 +212,6 @@ select {
   border-radius: 5px;
   background-color: #f0e6d2;
   color: #4a3c31;
-  margin-bottom: 10px;
 }
 
 button {
