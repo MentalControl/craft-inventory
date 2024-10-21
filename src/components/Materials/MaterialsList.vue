@@ -2,7 +2,7 @@
   <ul class="materials-list">
     <MaterialItem
       v-for="material in materials"
-      :key="material.id"
+      :key="material.firestoreId"
       :material="material"
       :unitOptions="unitOptions"
       @remove="removeMaterial"

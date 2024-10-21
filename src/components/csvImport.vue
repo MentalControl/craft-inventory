@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import Papa from 'papaparse'
 import { useMaterialStore } from '@/store/index'
 import { useUserStore } from '@/store/userStore'
+import { v4 as uuidv4 } from 'uuid'
 
 const csvFile = ref(null)
 const isLoading = ref(false) // Состояние загрузки
@@ -40,6 +41,7 @@ const importCSV = async () => {
         for (let index = 0; index < totalRows; index++) {
           const row = results.data[index]
           const material = {
+            id: uuidv4(),
             name: row.name,
             quantity: Number(row.quantity) || 0,
             unit: row.unit,

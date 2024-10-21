@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useMaterialStore } from '@/store/index.js'
+import { v4 as uuidv4 } from 'uuid'
 
 const props = defineProps({
   title: {
@@ -43,12 +44,14 @@ function closeDialog() {
 // Добавление нового материала
 async function addMaterial() {
   try {
-    await materialStore.addMaterial({
+    const material = {
+      id: uuidv4(),
       name: newMaterial.value.name,
       quantity: newMaterial.value.quantity,
       unit: newMaterial.value.unit,
       category: newMaterial.value.category
-    })
+    }
+    await materialStore.addMaterial(material)
 
     emit('materialAdded', newMaterial.value)
 
