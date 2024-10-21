@@ -29,7 +29,7 @@ export const useMaterialStore = defineStore('material', {
         materialsRef,
         (snapshot) => {
           const materialsData = snapshot.docs.map((doc) => ({
-            id: doc.id,
+            firestoreId: doc.id,
             ...doc.data()
           }))
           this.materials = materialsData

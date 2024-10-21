@@ -202,7 +202,6 @@ input {
   border-radius: 5px;
   background-color: #e8dcc7;
   color: #4a3c31;
-  margin-bottom: 10px;
 }
 
 select {
