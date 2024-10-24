@@ -7,10 +7,6 @@ defineProps({
   description: {
     type: String,
     required: true
-  },
-  buttonText: {
-    type: String,
-    default: 'Добавить новый материал'
   }
 })
 </script>
@@ -19,7 +15,7 @@ defineProps({
   <header class="content-title">
     <div class="top-header">
       <h1>{{ title }}</h1>
-      <button @click="$emit('openDialog')">{{ buttonText }}</button>
+      <slot name="btn-action"></slot>
     </div>
     <p>{{ description }}</p>
   </header>
@@ -46,7 +42,7 @@ defineProps({
     flex-direction: column;
   }
   button {
-    max-width: 250px;
+    max-width: 200px;
   }
 }
 </style>

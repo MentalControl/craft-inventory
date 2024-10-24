@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import Papa from 'papaparse'
-import { useMaterialStore } from '@/store/index'
+import { useMaterialStore } from '@/store/materialStore'
 import { useUserStore } from '@/store/userStore'
 import { v4 as uuidv4 } from 'uuid'
 

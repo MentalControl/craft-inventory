@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useMaterialStore } from '@/store/index.js'
+import { useMaterialStore } from '@/store/materialStore.js'
 import { useMaterialSort } from '@/composables/useMaterialSort'
 import { useSearch } from '@/composables/useSearch'
 
@@ -14,7 +14,6 @@ import csvImport from '@/components/csvImport.vue'
 
 const TITLE = 'Великие Запасы Материалов'
 const DESCRIPTION = `Материалы — кровь и камень нашего братства! Добавляйте новые материалы, выбирайте нужные из наших несметных запасов и сортируйте по категориям.
-
 Никто не уйдёт без нужных ресурсов, ведь каждый гвоздь и каждая капля масла на вес золота! Знай своё ремесло и держи инструменты наготове!`
 
 const materialStore = useMaterialStore()
@@ -63,12 +62,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageHeader
-    :title="TITLE"
-    :description="DESCRIPTION"
-    buttonText="Добавить материал"
-    @openDialog="openMaterialDialog"
-  />
+  <PageHeader :title="TITLE" :description="DESCRIPTION">
+    <template #btn-action>
+      <button @click="openMaterialDialog">Добавить материал</button>
+    </template>
+  </PageHeader>
   <div class="materials">
     <div class="materials__content">
       <csvImport />

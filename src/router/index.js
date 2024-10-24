@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import MaterialsView from '@/views/MaterialsView.vue'
 import ProductsView from '@/views/ProductsView.vue'
+import DashboardView from '@/views/DashboardView.vue'
 import { useUserStore } from '@/store/userStore'
 
 const routes = [
@@ -20,6 +21,12 @@ const routes = [
     path: '/products',
     name: 'Products',
     component: ProductsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: DashboardView,
     meta: { requiresAuth: true }
   }
 ]

@@ -17,7 +17,7 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <button @click="handleLogout">
+  <button @click="handleLogout" class="logout-btn">
     {{ userStore.user.email }}
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
@@ -39,11 +39,13 @@ const handleLogout = async () => {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    max-width: 250px;
     svg {
       width: 18px;
       stroke: #fff;
     }
   }
+}
+.logout-btn {
+  max-width: 250px;
 }
 </style>

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useMaterialStore } from '@/store/index.js'
+import { useMaterialStore } from '@/store/materialStore.js'
 import { storeToRefs } from 'pinia'
 
 // Получаемый список материалов из стора

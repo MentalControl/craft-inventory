@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useMaterialStore } from '@/store/index.js'
+import { useMaterialStore } from '@/store/materialStore.js'
 import { v4 as uuidv4 } from 'uuid'
 
 const props = defineProps({

@@ -3,10 +3,11 @@ import { ref } from 'vue'
 import { useUserStore } from '@/store/userStore'
 import AuthComp from '@/components/AuthComp.vue'
 import UserButton from '@/components/UserButton.vue'
+import PageHeader from '@/components/pages/PageHeader.vue'
 
-const title = ref('Хроники Складских Деяний')
-const description = ref(
-  `Добро пожаловать в наш Великий Склад! Здесь записаны все подвиги нашего братства по добыче, использованию и созданию изделий. <br> Каждый материал, добытый с трудом, и каждое изделие,выкованное в огне, хранится в этих свитках! Следите за историей материалов и изделий, да будет известно, кто сотворил славные творения!`
+const TITLE = ref('Хроники Складских Деяний')
+const DESCRIPTION = ref(
+  `Добро пожаловать в наш Великий Склад! Здесь записаны все подвиги нашего братства по добыче, использованию и созданию изделий. Каждый материал, добытый с трудом, и каждое изделие,выкованное в огне, хранится в этих свитках! Следите за историей материалов и изделий, да будет известно, кто сотворил славные творения!`
 )
 
 const userStore = useUserStore()
@@ -14,14 +15,11 @@ const userStore = useUserStore()
 
 <template>
   <div class="home">
-    <header class="content-title">
-      <div class="top-header">
-        <h1>{{ title }}</h1>
-        <!-- Показываем кнопку выхода, если пользователь авторизован -->
+    <PageHeader :title="TITLE" :description="DESCRIPTION">
+      <template #btn-action>
         <UserButton v-if="userStore.user" />
-      </div>
-      <p v-html="description"></p>
-    </header>
+      </template>
+    </PageHeader>
 
     <!-- Если идет загрузка, показываем сообщение "Загрузка..." -->
     <div v-if="userStore.loading" class="spinner"></div>

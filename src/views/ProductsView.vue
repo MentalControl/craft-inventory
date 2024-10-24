@@ -1,10 +1,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import PageHeader from '@/components/pages/PageHeader.vue'
 import { useMaterialStore } from '@/store/materialStore.js'
 import { useProductStore } from '@/store/productStore.js'
 import { useUserStore } from '@/store/userStore'
 import { db } from '@/firebase'
 import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore'
+
+const TITLE = 'Кузница Великих Изделий'
+const DESCRIPTION = `Тут в огне рождаются легенды! Создавай свои изделия, добавляй рецепты, выкладывай результаты и не забудь отметить все необходимые материалы. А если что-то пошло не так — не беда! Удаляй ошибочные изделия или повтори успех прошлого. Пусть искры летят, а молоты гремят, ведь твои творения будут жить вечно!`
 
 const materialStore = useMaterialStore()
 const productStore = useProductStore()
@@ -189,10 +193,12 @@ onMounted(async () => {
 </script>
 
 <template>
+  <PageHeader :title="TITLE" :description="DESCRIPTION">
+    <template #btn-action>
+      <button @click="showNewProductForm = true">Добавить изделие</button>
+    </template>
+  </PageHeader>
   <div class="products">
-    <h2>Products</h2>
-    <button @click="showNewProductForm = true" class="btn btn-primary">New Product</button>
-
     <div v-if="showNewProductForm" class="new-product-form">
       <h3>New Product</h3>
       <input v-model="newProduct.name" placeholder="Product Name" required class="form-input" />
@@ -264,7 +270,7 @@ onMounted(async () => {
 
 <style scoped>
 .products {
-  max-width: 600px;
+  width: 100%;
   margin: 0 auto;
 }
 
