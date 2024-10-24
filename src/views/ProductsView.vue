@@ -1,109 +1,209 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useMaterialStore } from '@/store/index.js'
+import { ref, computed, onMounted } from 'vue'
+import { useMaterialStore } from '@/store/materialStore.js'
+import { useProductStore } from '@/store/productStore.js'
+import { useUserStore } from '@/store/userStore'
+import { db } from '@/firebase'
+import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore'
 
 const materialStore = useMaterialStore()
+const productStore = useProductStore()
+const userStore = useUserStore()
 
-const products = ref([])
 const showNewProductForm = ref(false)
-const newProduct = ref({
-  name: '',
-  materials: [],
-  materialErrors: {} // Добавлено для хранения ошибок
-})
+const newProduct = ref({ name: '', materials: [], materialErrors: {} })
 const searchMaterial = ref('')
 
-const filteredMaterials = computed(() => {
-  return materialStore.materials.filter((material) =>
+const filteredMaterials = computed(() =>
+  materialStore.materials.filter((material) =>
     material.name.toLowerCase().includes(searchMaterial.value.toLowerCase())
   )
-})
+)
 
 function addMaterialToProduct(material) {
-  const existingMaterial = newProduct.value.materials.find((m) => m.id === material.id)
-  if (existingMaterial) {
-    existingMaterial.quantity++
-  } else {
-    newProduct.value.materials.push({
-      id: material.id,
-      name: material.name,
-      quantity: 1,
-      unit: material.unit
-    })
+  const existingMaterial = materialStore.getMaterialById(material.firestoreId)
+  if (!existingMaterial) {
+    console.error(`Материал с ID ${material.firestoreId} не найден.`)
+    return
   }
+
+  newProduct.value.materials.push({
+    firestoreId: material.firestoreId,
+    name: material.name,
+    quantity: 1,
+    unit: material.unit
+  })
   searchMaterial.value = ''
 }
 
 function removeMaterialFromProduct(materialId) {
-  delete newProduct.value.materialErrors[materialId] // Удаляем ошибку при удалении материала
-  newProduct.value.materials = newProduct.value.materials.filter((m) => m.id !== materialId)
+  delete newProduct.value.materialErrors[materialId]
+  newProduct.value.materials = newProduct.value.materials.filter(
+    (m) => m.firestoreId !== materialId
+  )
 }
 
 function changeMaterialQuantity(materialId, quantity) {
-  const material = newProduct.value.materials.find((m) => m.id === materialId)
+  const material = newProduct.value.materials.find((m) => m.firestoreId === materialId)
   if (material) {
     material.quantity = quantity
-    const stockMaterial = materialStore.materials.find((m) => m.id === materialId)
+    const stockMaterial = materialStore.getMaterialById(materialId)
     if (stockMaterial && stockMaterial.quantity < quantity) {
       newProduct.value.materialErrors[materialId] =
-        `Недостаточно материала "${material.name}". В наличии: ${stockMaterial.quantity} ${stockMaterial.unit}`
+        `Недостаточно материала "${material.name}". Доступно: ${stockMaterial.quantity} ${stockMaterial.unit}`
     } else {
-      delete newProduct.value.materialErrors[materialId] // Удаляем ошибку если она устранена
+      delete newProduct.value.materialErrors[materialId]
     }
   }
 }
 
-function validateProduct() {
-  const errors = []
-  newProduct.value.materials.forEach((material) => {
-    const stockMaterial = materialStore.materials.find((m) => m.id === material.id)
-    if (stockMaterial.quantity < material.quantity) {
+function validateProductMaterials(product) {
+  return product.materials.reduce((errors, material) => {
+    const stockMaterial = materialStore.getMaterialById(material.firestoreId)
+    if (!stockMaterial) {
+      errors.push(`Материал "${material.name}" не найден в кладовке.`)
+    } else if (stockMaterial.quantity < material.quantity) {
       errors.push(
-        `Недостаточно материала "${material.name}". В наличии: ${stockMaterial.quantity} ${stockMaterial.unit}`
+        `Недостаточно материала "${material.name}". Доступно: ${stockMaterial.quantity} ${stockMaterial.unit}`
       )
     }
-  })
-  return errors
+    return errors
+  }, [])
 }
 
-function saveProduct() {
-  const errors = validateProduct()
+async function saveProduct() {
+  const errors = validateProductMaterials(newProduct.value)
   if (errors.length > 0) {
     alert(errors.join('\n'))
     return
   }
 
-  products.value.push({
-    id: Date.now(),
+  const productData = {
     name: newProduct.value.name,
-    materials: newProduct.value.materials
-  })
+    materials: newProduct.value.materials,
+    repeatCount: 1
+  }
 
-  newProduct.value.materials.forEach((material) => {
-    materialStore.decreaseMaterialQuantity(material.id, material.quantity)
-  })
+  await productStore.addProduct(productData)
 
+  for (const material of newProduct.value.materials) {
+    const stockMaterial = materialStore.getMaterialById(material.firestoreId)
+    if (stockMaterial) {
+      const newQuantity = stockMaterial.quantity - material.quantity
+      await updateMaterialQuantity(material.firestoreId, newQuantity)
+      materialStore.setMaterialQuantity(material.firestoreId, newQuantity)
+    } else {
+      console.error(`Материал с ID ${material.firestoreId} не найден в базе данных.`)
+    }
+  }
+
+  resetNewProductForm()
+}
+
+async function updateMaterialQuantity(materialId, newQuantity) {
+  const materialRef = doc(db, `users/${userStore.user.uid}/materials`, materialId)
+  await updateDoc(materialRef, { quantity: newQuantity })
+}
+
+async function repeatProduct(product) {
+  const errors = validateProductMaterials(product)
+  if (errors.length > 0) {
+    alert(errors.join('\n'))
+    return
+  }
+
+  await Promise.all(
+    product.materials.map(async (material) => {
+      const currentMaterial = await getDoc(
+        doc(db, `users/${userStore.user.uid}/materials`, material.firestoreId)
+      )
+      if (currentMaterial.exists()) {
+        const newQuantity = currentMaterial.data().quantity - material.quantity
+        await updateMaterialQuantity(material.firestoreId, newQuantity)
+        materialStore.decreaseMaterialQuantity(material.firestoreId, material.quantity)
+      }
+    })
+  )
+
+  product.repeatCount++
+  await updateProductInDB(product)
+  alert('Продукт успешно повторен!')
+}
+
+async function cancelProduct(product) {
+  if (product.repeatCount <= 0) {
+    alert('Нельзя отменить продукт, который не был повторен')
+    return
+  }
+
+  await Promise.all(
+    product.materials.map(async (material) => {
+      const currentMaterial = materialStore.getMaterialById(material.firestoreId)
+      if (currentMaterial) {
+        const newQuantity = currentMaterial.quantity + material.quantity
+        await updateMaterialQuantity(material.firestoreId, newQuantity)
+        materialStore.setMaterialQuantity(material.firestoreId, newQuantity)
+      }
+    })
+  )
+
+  product.repeatCount--
+  if (product.repeatCount === 0) {
+    await deleteProductFromDB(product)
+    productStore.removeProduct(product.firestoreId)
+  } else {
+    await updateProductInDB(product)
+  }
+
+  alert(`Материалы возвращены. Осталось повторений: ${product.repeatCount}`)
+}
+
+async function updateProductInDB(product) {
+  const productRef = doc(db, `users/${userStore.user.uid}/products`, product.firestoreId)
+  await updateDoc(productRef, { repeatCount: product.repeatCount })
+}
+
+async function deleteProductFromDB(product) {
+  const productRef = doc(db, `users/${userStore.user.uid}/products`, product.firestoreId)
+  await deleteDoc(productRef)
+}
+
+function resetNewProductForm() {
   newProduct.value = { name: '', materials: [], materialErrors: {} }
   showNewProductForm.value = false
 }
+
+function getMaxQuantity(materialId) {
+  const material = materialStore.getMaterialById(materialId)
+  return material ? material.quantity : 0
+}
+
+onMounted(async () => {
+  try {
+    await Promise.all([productStore.subToProducts(), materialStore.subToMaterials()])
+  } catch (error) {
+    console.error('Error in onMounted:', error)
+    // Добавьте здесь обработку ошибок, например, показ сообщения пользователю
+  }
+})
 </script>
 
 <template>
   <div class="products">
-    <h2>Изделия</h2>
-    <button @click="showNewProductForm = true">Новое изделие</button>
+    <h2>Products</h2>
+    <button @click="showNewProductForm = true" class="btn btn-primary">New Product</button>
 
     <div v-if="showNewProductForm" class="new-product-form">
-      <h3>Новое изделие</h3>
-      <input v-model="newProduct.name" placeholder="Название изделия" required />
-
+      <h3>New Product</h3>
+      <input v-model="newProduct.name" placeholder="Product Name" required class="form-input" />
       <div class="material-search">
-        <input v-model="searchMaterial" placeholder="Поиск материала" />
+        <input v-model="searchMaterial" placeholder="Search Material" class="form-input" />
         <ul v-if="searchMaterial" class="material-list">
           <li
             v-for="material in filteredMaterials"
-            :key="material.id"
+            :key="material.firestoreId"
             @click="addMaterialToProduct(material)"
+            @keydown.esc="closeDropdown"
           >
             {{ material.name }} ({{ material.quantity }} {{ material.unit }})
           </li>
@@ -111,36 +211,52 @@ function saveProduct() {
       </div>
 
       <ul class="selected-materials">
-        <li v-for="material in newProduct.materials" :key="material.id">
+        <li
+          v-for="material in newProduct.materials"
+          :key="material.firestoreId"
+          class="material-item"
+        >
           {{ material.name }}
           <input
             type="number"
             v-model.number="material.quantity"
             min="1"
-            :max="materialStore.getMaterialById(material.id).quantity"
-            @input="changeMaterialQuantity(material.id, material.quantity)"
+            :max="getMaxQuantity(material.firestoreId)"
+            @input="changeMaterialQuantity(material.firestoreId, material.quantity)"
+            class="form-input quantity-input"
           />
           {{ material.unit }}
-          <button @click="removeMaterialFromProduct(material.id)">Удалить</button>
-          <span v-if="newProduct.materialErrors[material.id]" class="error">{{
-            newProduct.materialErrors[material.id]
-          }}</span>
-          <!-- Отображение ошибки -->
+          <button @click="removeMaterialFromProduct(material.firestoreId)" class="btn btn-danger">
+            Remove
+          </button>
+          <span v-if="newProduct.materialErrors[material.firestoreId]" class="error">
+            {{ newProduct.materialErrors[material.firestoreId] }}
+          </span>
         </li>
       </ul>
 
-      <button @click="saveProduct">Сохранить изделие</button>
-      <button @click="showNewProductForm = false">Отмена</button>
+      <button @click="saveProduct" class="btn btn-success">Save Product</button>
+      <button @click="showNewProductForm = false" class="btn btn-secondary">Cancel</button>
     </div>
 
     <ul class="product-list">
-      <li v-for="product in products" :key="product.id">
-        <h4>{{ product.name }}</h4>
-        <ul>
-          <li v-for="material in product.materials" :key="material.id">
+      <li v-for="product in productStore.products" :key="product.firestoreId" class="product-item">
+        <h4>{{ product.name }} (Повторений: {{ product.repeatCount || 0 }})</h4>
+        <ul class="product-list__materials">
+          <li v-for="material in product.materials" :key="material.firestoreId">
             {{ material.name }}: {{ material.quantity }} {{ material.unit }}
           </li>
         </ul>
+        <div class="product-list__buttons">
+          <button @click="repeatProduct(product)" class="btn btn-primary">Повторить</button>
+          <button
+            @click="cancelProduct(product)"
+            :disabled="!product.repeatCount"
+            class="btn btn-warning"
+          >
+            Отменить
+          </button>
+        </div>
       </li>
     </ul>
   </div>
@@ -206,11 +322,10 @@ function saveProduct() {
   border: 1px solid #ccc;
   padding: 1rem;
   border-radius: 4px;
-  background-image: url('../assets/product-bg.png');
 }
 
 .error {
-  color: red; /* Цвет ошибки */
-  font-size: 0.9rem; /* Размер шрифта для ошибки */
+  color: red;
+  font-size: 0.9rem;
 }
 </style>
