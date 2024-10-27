@@ -3,10 +3,6 @@ defineProps({
   title: {
     type: String,
     required: true
-  },
-  description: {
-    type: String,
-    required: true
   }
 })
 </script>
@@ -16,8 +12,8 @@ defineProps({
     <div class="top-header">
       <h1>{{ title }}</h1>
       <slot name="btn-action"></slot>
+      <slot name="description"></slot>
     </div>
-    <p>{{ description }}</p>
   </header>
 </template>
 

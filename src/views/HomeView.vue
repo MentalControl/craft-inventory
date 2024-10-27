@@ -15,9 +15,12 @@ const userStore = useUserStore()
 
 <template>
   <div class="home">
-    <PageHeader :title="TITLE" :description="DESCRIPTION">
+    <PageHeader :title="TITLE">
       <template #btn-action>
         <UserButton v-if="userStore.user" />
+      </template>
+      <template #description>
+        <p>{{ DESCRIPTION }}</p>
       </template>
     </PageHeader>
 

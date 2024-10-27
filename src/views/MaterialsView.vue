@@ -13,8 +13,6 @@ import SearchMaterials from '@/components/Materials/SearchMaterials.vue'
 import csvImport from '@/components/csvImport.vue'
 
 const TITLE = 'Великие Запасы Материалов'
-const DESCRIPTION = `Материалы — кровь и камень нашего братства! Добавляйте новые материалы, выбирайте нужные из наших несметных запасов и сортируйте по категориям.
-Никто не уйдёт без нужных ресурсов, ведь каждый гвоздь и каждая капля масла на вес золота! Знай своё ремесло и держи инструменты наготове!`
 
 const materialStore = useMaterialStore()
 const { materials, unitOptions, categoryOptions } = storeToRefs(materialStore)
@@ -62,7 +60,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageHeader :title="TITLE" :description="DESCRIPTION">
+  <PageHeader :title="TITLE">
     <template #btn-action>
       <button @click="openMaterialDialog">Добавить материал</button>
     </template>
@@ -138,6 +136,7 @@ onMounted(async () => {
     gap: var(--gap);
 
     &__item {
+      height: fit-content;
       flex: 0 1 calc((100% / var(--columns-x-large)) - var(--gap));
       display: flex;
       flex-direction: column;
@@ -160,28 +159,10 @@ onMounted(async () => {
       @media (max-width: 400px) {
         flex: 0 1 calc(100% - var(--gap));
       }
+      &.editActive {
+        height: 100%;
+      }
     }
-  }
-}
-
-aside {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  gap: 15px;
-
-  @media (max-width: 767.98px) {
-    flex: 1 1 100%;
-  }
-
-  input,
-  select {
-    padding: 10px;
-    border: 1px solid #8c7a64;
-    border-radius: 5px;
-    background-color: #e8dcc7;
-    color: #4a3c31;
-    margin-bottom: 10px;
   }
 }
 

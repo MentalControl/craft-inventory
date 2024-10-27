@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from './store/userStore'
 import { auth } from './firebase'
@@ -28,6 +28,32 @@ onMounted(() => {
   })
   userStore.initAuthState()
 })
+
+const updateContentPadding = () => {
+  if (window.innerWidth <= 992) {
+    const sidebar = document.querySelector('nav')
+    const mainContent = document.querySelector('.main')
+    if (sidebar && mainContent) {
+      const sidebarHeight = sidebar.offsetHeight
+      mainContent.style.paddingBottom = `${sidebarHeight}px`
+    }
+  } else {
+    // Сбрасываем padding если экран больше заданной ширины
+    const mainContent = document.querySelector('.main')
+    if (mainContent) {
+      mainContent.style.paddingBottom = '0'
+    }
+  }
+}
+
+onMounted(() => {
+  updateContentPadding()
+  window.addEventListener('resize', updateContentPadding)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateContentPadding)
+})
 </script>
 
 <template>
@@ -38,15 +64,10 @@ onMounted(() => {
     </div>
     <div class="links">
       <MenuItem to="/">
-        <svg
-          viewBox="0 0 44 44"
-          fill="#000000"
-          xmlns="http://www.w3.org/2000/svg"
-          stroke-width="0px"
-        >
+        <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="#000000">
           <path
-            d="M21.1062 9.928C21.2112 9.717 21.3872 9.551 21.6032 9.457C21.8192 9.364 22.0612 9.35 22.2872 9.417L22.4012 9.459L30.4012 12.959C30.5832 13.039 30.7372 13.171 30.8442 13.339L30.9022 13.442L36.9022 25.942C36.9502 26.043 36.9822 26.152 36.9942 26.263L37.0002 26.375V35.375C37.0002 35.62 36.9102 35.856 36.7472 36.039C36.5852 36.223 36.3602 36.339 36.1172 36.368L36.0002 36.375H8.00023C7.86223 36.375 7.72523 36.346 7.59923 36.291C7.47223 36.236 7.35923 36.155 7.26523 36.053C7.17123 35.952 7.10023 35.832 7.05523 35.702C7.00923 35.571 6.99223 35.433 7.00323 35.295L7.01923 35.179L10.0192 20.179C10.0512 20.02 10.1212 19.87 10.2242 19.744C10.3272 19.618 10.4592 19.519 10.6092 19.455L10.7252 19.413L17.3022 17.534L21.1062 9.928ZM22.4692 11.672L18.8942 18.822C18.7872 19.036 18.6072 19.204 18.3872 19.297L18.2752 19.337L11.8612 21.168L11.0192 25.375H14.0002V27.375H10.6192L9.21923 34.375H15.9992L16.0002 32.375C16.0002 30.823 16.6022 29.331 17.6782 28.213C18.7552 27.094 20.2242 26.437 21.7752 26.379L22.0002 26.375C23.5522 26.375 25.0442 26.977 26.1622 28.053C27.2812 29.13 27.9382 30.599 27.9962 32.15L28.0002 32.375V34.375H35.0002V26.603L34.4102 25.375H30.0002V23.375H33.4502L32.0002 20.352V20.375H25.0002V18.375H31.0502L29.2602 14.642L22.4702 11.672H22.4692ZM22.0002 28.375C20.9742 28.375 19.9872 28.77 19.2432 29.477C18.5002 30.184 18.0562 31.15 18.0052 32.175L18.0002 32.375V34.375H26.0002V32.375C26.0002 31.384 25.6322 30.428 24.9682 29.693C24.3032 28.957 23.3892 28.495 22.4032 28.395L22.2002 28.38L22.0002 28.375Z"
-            fill="#3C3C3C"
+            fill="#000000"
+            d="M195.344 71.438c-3.83.12-7.66 1.205-10.938 3.062-9.987 5.66-16.774 16.198-25.062 31.72-8.288 15.52-17.55 36.4-29.03 63.218C107.35 223.07 75.606 300.42 26.843 403.875a9.5 9.5 0 1 0 17.187 8.094c48.966-103.882 80.897-181.682 103.75-235.064 11.428-26.69 20.6-47.274 28.314-61.72 7.713-14.443 14.5-22.366 17.656-24.155 1.578-.893 1.773-.822 2.78-.56 1.01.26 3.136 1.348 6 4.155 5.732 5.614 13.667 17.43 23.314 34.438 19.077 33.636 45.742 87.6 87.28 159.03-4.364 10.616-9.077 21.89-14.25 33.876a9.5 9.5 0 1 0 17.438 7.53c20.076-46.524 33.676-83.107 44.188-106.47 5.256-11.68 9.878-20.06 13.22-24.093 1.445-1.745 2.452-2.466 2.874-2.718.654.36 4.928 3.886 9.937 12.468 5.162 8.84 11.398 22.197 18.845 40 14.893 35.605 34.786 89.108 63.313 162.656a9.503 9.503 0 1 0 17.718-6.875c-28.48-73.43-48.32-126.835-63.5-163.126-7.59-18.146-13.993-31.983-19.97-42.22-5.974-10.235-11.09-17.537-19.78-20.843-2.172-.825-4.596-1.186-7-1.124-2.403.062-4.778.553-6.875 1.47-4.192 1.83-7.355 4.77-10.186 8.186-5.664 6.836-10.42 16.147-15.938 28.407-6.044 13.432-12.834 30.485-20.97 50.624-37.043-64.58-61.375-113.65-79.81-146.156-9.925-17.5-17.96-30.198-26.564-38.626-4.3-4.213-8.923-7.548-14.53-9-1.403-.362-2.857-.563-4.313-.624-.547-.024-1.08-.018-1.626 0zm5.03 258.78c-39.944 0-72.31 39.03-72.31 87.188h144.624c0-48.16-32.368-87.187-72.313-87.187z"
           ></path>
         </svg>
       </MenuItem>
@@ -81,7 +102,7 @@ onMounted(() => {
         </svg>
       </MenuItem>
       <MenuItem v-if="userStore.user" to="/dashboard/">
-        <svg viewBox="0 0 24 24" fill="#000" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 24 24" fill="#000" xmlns="http://www.w3.org/2000/svg" class="nofill">
           <path
             d="M18 3.00001V3.00001C19.6569 3.00001 21 4.34315 21 6.00001L21 8.14286C21 8.47698 21 8.64405 20.9234 8.76602C20.8834 8.82962 20.8296 8.8834 20.766 8.92336C20.644 9 20.477 9 20.1429 9L15 9M18 3.00001V3.00001C16.3431 3.00001 15 4.34315 15 6.00001L15 9M18 3.00001L7 3.00001C5.11438 3.00001 4.17157 3.00001 3.58579 3.58579C3 4.17158 3 5.11439 3 7.00001L3 21L6 20L9 21L12 20L15 21L15 9"
             stroke="#000"
@@ -119,6 +140,10 @@ onMounted(() => {
   --columns-small: 1;
   --gap: 10px;
 }
+body,
+html {
+  background-color: var(--bg-color); /* тот же цвет, что и у сайдбара */
+}
 * {
   margin: 0;
   padding: 0;
@@ -138,6 +163,7 @@ onMounted(() => {
 }
 .main {
   background: var(--bg-color);
+  width: 100%;
 }
 .container {
   // width: clamp(320px, 100%, 1440px);
@@ -155,27 +181,58 @@ nav {
   flex-direction: column;
   justify-content: start;
   gap: 25px;
+  @media (max-width: 991.98px) {
+    position: fixed;
+    bottom: 0;
+    flex: none;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0;
+    max-width: 100%;
+    height: auto;
+    background: var(--bg-color);
+    border-top: 1px solid var(--text-color);
+    padding-block: 10px;
+    z-index: 111;
+  }
   .logo {
     padding-block: 20px;
+    @media (max-width: 991.98px) {
+      padding-block: 10px;
+    }
     img {
       width: 100%;
       max-width: 100%;
       height: auto;
+      @media (max-width: 991.98px) {
+        display: none;
+      }
     }
   }
   .links {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    a {
+    @media (max-width: 991.98px) {
+      flex-direction: row;
+      margin-inline: auto;
+    }
+    a.menu-item {
       display: flex;
       align-self: center;
-      &:first-child {
-        svg {
-          width: 52px;
-        }
-      }
+      // &:first-child {
+      //   svg {
+      //     width: 52px;
+      //   }
+      // }
+
       &.router-link-exact-active {
+        svg.nofill {
+          path {
+            stroke: var(--accent-color);
+            fill: transparent;
+          }
+        }
         svg {
           path {
             fill: var(--accent-color);
@@ -188,6 +245,9 @@ nav {
       fill: var(--text-color);
       stroke: transparent;
       transition: stroke 0.3s ease;
+      @media (max-width: 991.98px) {
+        width: 44px;
+      }
       &:hover {
         stroke: var(--accent-color);
       }

@@ -98,7 +98,7 @@ async function removeMaterial() {
 </script>
 
 <template>
-  <li class="materials-list__item">
+  <li class="materials-list__item" :class="{ editActive: isEditing }">
     <span v-if="!isEditing" class="material_item" @click="enableEditing">
       {{ material.name }}:
       <span class="material_quantity">{{ material.quantity }} {{ material.unit }}</span>

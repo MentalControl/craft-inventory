@@ -8,7 +8,6 @@ import { db } from '@/firebase'
 import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore'
 
 const TITLE = 'Кузница Великих Изделий'
-const DESCRIPTION = `Тут в огне рождаются легенды! Создавай свои изделия, добавляй рецепты, выкладывай результаты и не забудь отметить все необходимые материалы. А если что-то пошло не так — не беда! Удаляй ошибочные изделия или повтори успех прошлого. Пусть искры летят, а молоты гремят, ведь твои творения будут жить вечно!`
 
 const materialStore = useMaterialStore()
 const productStore = useProductStore()
@@ -193,17 +192,17 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageHeader :title="TITLE" :description="DESCRIPTION">
+  <PageHeader :title="TITLE">
     <template #btn-action>
       <button @click="showNewProductForm = true">Добавить изделие</button>
     </template>
   </PageHeader>
   <div class="products">
     <div v-if="showNewProductForm" class="new-product-form">
-      <h3>New Product</h3>
-      <input v-model="newProduct.name" placeholder="Product Name" required class="form-input" />
+      <h3>Новое изделие</h3>
+      <input v-model="newProduct.name" placeholder="Название изделия" required class="form-input" />
       <div class="material-search">
-        <input v-model="searchMaterial" placeholder="Search Material" class="form-input" />
+        <input v-model="searchMaterial" placeholder="Поиск материала" class="form-input" />
         <ul v-if="searchMaterial" class="material-list">
           <li
             v-for="material in filteredMaterials"
@@ -222,18 +221,21 @@ onMounted(async () => {
           :key="material.firestoreId"
           class="material-item"
         >
-          {{ material.name }}
-          <input
-            type="number"
-            v-model.number="material.quantity"
-            min="1"
-            :max="getMaxQuantity(material.firestoreId)"
-            @input="changeMaterialQuantity(material.firestoreId, material.quantity)"
-            class="form-input quantity-input"
-          />
-          {{ material.unit }}
+          <div>
+            {{ material.name }}
+
+            <input
+              type="number"
+              v-model.number="material.quantity"
+              min="1"
+              :max="getMaxQuantity(material.firestoreId)"
+              @input="changeMaterialQuantity(material.firestoreId, material.quantity)"
+              class="form-input quantity-input"
+            />
+            {{ material.unit }}
+          </div>
           <button @click="removeMaterialFromProduct(material.firestoreId)" class="btn btn-danger">
-            Remove
+            Удалить
           </button>
           <span v-if="newProduct.materialErrors[material.firestoreId]" class="error">
             {{ newProduct.materialErrors[material.firestoreId] }}
@@ -241,13 +243,15 @@ onMounted(async () => {
         </li>
       </ul>
 
-      <button @click="saveProduct" class="btn btn-success">Save Product</button>
-      <button @click="showNewProductForm = false" class="btn btn-secondary">Cancel</button>
+      <button @click="saveProduct" class="btn btn-success">Сохранить изделие</button>
+      <button @click="showNewProductForm = false" class="btn btn-secondary">Отменить</button>
     </div>
 
     <ul class="product-list">
       <li v-for="product in productStore.products" :key="product.firestoreId" class="product-item">
-        <h4>{{ product.name }} (Повторений: {{ product.repeatCount || 0 }})</h4>
+        <h4 class="product-item__title">
+          {{ product.name }} <span>(Повторений: {{ product.repeatCount || 0 }})</span>
+        </h4>
         <ul class="product-list__materials">
           <li v-for="material in product.materials" :key="material.firestoreId">
             {{ material.name }}: {{ material.quantity }} {{ material.unit }}
