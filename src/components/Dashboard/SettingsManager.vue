@@ -25,7 +25,7 @@
       </div>
       <div class="options-list">
         <div v-for="category in settingsStore.categoryOptions" :key="category" class="option-item">
-          {{ category }}
+          <span>{{ category }}</span>
           <button @click="removeCategory(category)" class="remove-btn">×</button>
         </div>
       </div>
@@ -69,9 +69,9 @@ const removeCategory = async (category) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .settings-manager {
-  padding: 20px;
+  margin-top: 1rem;
   background-color: var(--bg-color);
   color: var(--text-color);
 }
@@ -82,44 +82,42 @@ const removeCategory = async (category) => {
   border-radius: 4px;
   padding: 15px;
   background-color: #ffffff; /* Optional: Background for each section */
-}
-
-.settings-section h3 {
-  margin-bottom: 15px;
-  color: var(--main-color);
-}
-
-.input-group {
-  display: flex;
-  gap: var(--gap);
-  margin-bottom: 15px;
-}
-
-.input-group input {
-  flex: 1;
-  padding: 8px;
-  border: var(--border);
-  border-radius: 4px;
-  color: var(--text-color);
-}
-
-.input-group button {
-  padding: 8px 15px;
-  background-color: var(--button-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.input-group button:hover {
-  background-color: var(--hover-color);
-}
-
-.input-group button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+  h3 {
+    margin-bottom: 15px;
+    color: var(--main-color);
+  }
+  .input-group {
+    display: flex;
+    gap: var(--gap);
+    margin-bottom: 15px;
+    input {
+      flex: 1;
+      padding: 8px;
+      border: var(--border);
+      border-radius: 4px;
+      color: var(--text-color);
+    }
+    button {
+      flex: 0 0 20%;
+      padding: 8px 15px;
+      background-color: var(--button-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      &:hover {
+        background-color: var(--hover-color);
+      }
+      &:disabled {
+        background-color: rgb(229, 229, 229);
+        cursor: not-allowed;
+        &:hover {
+          box-shadow: 0 0 10px rgb(229, 229, 229);
+        }
+      }
+    }
+  }
 }
 
 .options-list {
@@ -133,15 +131,15 @@ const removeCategory = async (category) => {
   align-items: center;
   gap: 5px;
   padding: 5px 10px;
-  background-color: #f0f0f0; /* Optional: Background for each option */
+  background-color: var(--bg-color); /* Optional: Background for each option */
   border-radius: 4px;
   border: var(--border); /* Optional: Add border to options */
 }
 
 .remove-btn {
-  background: none;
+  background: var(--bg-color);
+  color: #e02424;
   border: none;
-  color: #ff4444;
   cursor: pointer;
   font-size: 18px;
   padding: 0 5px;

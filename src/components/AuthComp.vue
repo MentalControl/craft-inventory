@@ -34,7 +34,13 @@ const toggleAuthMode = () => {
     <h2>{{ isLogin ? 'Login' : 'Sign Up' }}</h2>
     <form @submit.prevent="handleSubmit">
       <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="password" type="password" placeholder="Password" required />
+      <input
+        v-model="password"
+        type="password"
+        placeholder="Password"
+        required
+        autocomplete="off"
+      />
       <button type="submit">{{ isLogin ? 'Login' : 'Sign Up' }}</button>
     </form>
     <p @click="toggleAuthMode">
