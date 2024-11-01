@@ -1,4 +1,3 @@
-// src/stores/settingsStore.js
 import { defineStore } from 'pinia'
 import { doc, setDoc, onSnapshot, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
@@ -6,8 +5,8 @@ import { useUserStore } from './userStore'
 
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
-    unitOptions: ['шт', 'упк', 'м', 'бутыл', 'рулон', 'компл', 'лист'],
-    categoryOptions: ['Прочее', 'Ткани', 'Фурнитура', 'Инструменты', 'Декор'],
+    unitOptions: JSON.parse(localStorage.getItem('unitOptions')) || [],
+    categoryOptions: JSON.parse(localStorage.getItem('categoryOptions')) || [],
     loading: false,
     error: null
   }),
@@ -52,6 +51,7 @@ export const useSettingsStore = defineStore('settings', {
           const data = doc.data()
           if (data.values) {
             this[optionsKey] = data.values
+            localStorage.setItem(optionsKey, JSON.stringify(data.values)) // Update local cache
           }
         } else {
           this.initializeSettings(userId, settingType, this[optionsKey])

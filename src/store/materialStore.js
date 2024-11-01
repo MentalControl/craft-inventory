@@ -1,13 +1,12 @@
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { collection, addDoc, doc, updateDoc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { useUserStore } from './userStore'
+import { useSettingsStore } from './settingsStore'
 
 export const useMaterialStore = defineStore('material', {
   state: () => ({
     materials: JSON.parse(localStorage.getItem('materials')) || [],
-    unitOptions: ['шт', 'упк', 'м', 'бутыл', 'рулон', 'компл', 'лист'],
-    categoryOptions: ['Прочее', 'Ткани', 'Фурнитура', 'Инструменты', 'Декор'],
     loading: false,
     error: null
   }),
@@ -29,8 +28,7 @@ export const useMaterialStore = defineStore('material', {
           this.loading = false
         },
         (error) => {
-          this.error = 'Error fetching materials: ' + error.message
-          this.loading = false
+          this.setError(`Error fetching materials: ${error.message}`)
         }
       )
     },
@@ -39,21 +37,17 @@ export const useMaterialStore = defineStore('material', {
       const material = this.materials.find((m) => m.firestoreId === id)
       if (material) {
         material.quantity = newQuantity
-        localStorage.setItem('materials', JSON.stringify(this.materials))
+        this.updateLocalStorage()
       }
     },
 
     async addMaterial(material) {
       const userStore = useUserStore()
+      const materialWithUserId = { ...material, userId: userStore.user?.uid }
       try {
-        const materialWithUserId = {
-          ...material,
-          userId: userStore.user?.uid
-        }
         await addDoc(collection(db, `users/${userStore.user.uid}/materials`), materialWithUserId)
       } catch (error) {
-        console.error('Error adding document: ', error)
-        throw error
+        this.setError(`Error adding material: ${error.message}`)
       }
     },
 
@@ -66,37 +60,25 @@ export const useMaterialStore = defineStore('material', {
       try {
         const materialRef = doc(db, `users/${userStore.user.uid}/materials`, id)
         await updateDoc(materialRef, { quantity: newQuantity, unit: newUnit })
-
         this.setMaterialQuantity(id, newQuantity)
       } catch (error) {
-        this.error = 'Error updating material: ' + error.message
-        throw error
+        this.setError(`Error updating material: ${error.message}`)
       }
     },
+
     async increaseMaterialQuantity(id, amount) {
       const material = this.materials.find((m) => m.firestoreId === id)
       if (material) {
         const newQuantity = material.quantity + amount
-        const userStore = useUserStore()
-        try {
-          const materialRef = doc(db, `users/${userStore.user.uid}/materials`, id)
-          await updateDoc(materialRef, { quantity: newQuantity })
-
-          // Update local state
-          material.quantity = newQuantity
-          localStorage.setItem('materials', JSON.stringify(this.materials))
-        } catch (error) {
-          console.error('Error increasing material quantity:', error)
-          this.error = 'Error increasing material quantity: ' + error.message
-          throw error
-        }
+        await this.updateMaterialQuantity(id, newQuantity)
       }
     },
+
     decreaseMaterialQuantity(id, amount) {
       const material = this.materials.find((m) => m.firestoreId === id)
       if (material && material.quantity >= amount) {
         material.quantity -= amount
-        localStorage.setItem('materials', JSON.stringify(this.materials))
+        this.updateLocalStorage()
       }
     },
 
@@ -104,27 +86,42 @@ export const useMaterialStore = defineStore('material', {
       const index = this.materials.findIndex((m) => m.firestoreId === id)
       if (index !== -1) {
         this.materials.splice(index, 1)
-        localStorage.setItem('materials', JSON.stringify(this.materials))
+        this.updateLocalStorage()
       }
     },
 
-    addUnitOption(unit) {
-      if (!this.unitOptions.includes(unit)) {
-        this.unitOptions.push(unit)
+    async updateMaterialQuantity(id, quantity) {
+      const userStore = useUserStore()
+      const materialRef = doc(db, `users/${userStore.user.uid}/materials`, id)
+      try {
+        await updateDoc(materialRef, { quantity })
+        this.setMaterialQuantity(id, quantity)
+      } catch (error) {
+        this.setError(`Error updating quantity: ${error.message}`)
       }
     },
 
-    addCategoryOption(category) {
-      if (!this.categoryOptions.includes(category)) {
-        this.categoryOptions.push(category)
-      }
+    updateLocalStorage() {
+      localStorage.setItem('materials', JSON.stringify(this.materials))
+    },
+
+    setError(message) {
+      this.error = message
+      console.error(message)
+      this.loading = false
     }
   },
 
   getters: {
-    getUnitOptions: (state) => state.unitOptions,
-    getCategoryOptions: (state) => state.categoryOptions,
-    getMaterialsByCategory: (state) => (category) =>
-      state.materials.filter((material) => material.category === category)
+    unitOptions() {
+      const settingsStore = useSettingsStore()
+      const { unitOptions } = storeToRefs(settingsStore)
+      return unitOptions
+    },
+    categoryOptions() {
+      const settingsStore = useSettingsStore()
+      const { categoryOptions } = storeToRefs(settingsStore)
+      return categoryOptions
+    }
   }
 })
