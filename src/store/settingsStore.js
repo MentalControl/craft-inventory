@@ -15,6 +15,11 @@ export const useSettingsStore = defineStore('settings', {
     async loadSettings() {
       try {
         const userId = this.getUserId()
+        if (!userId) {
+          console.warn('User is not authenticated. Settings cannot be loaded.')
+          return // Выход из функции, если пользователь не аутентифицирован
+        }
+
         await this.updateDefaultValues(userId)
 
         this.listenToSettingsChanges(userId, 'units', 'unitOptions')
@@ -103,7 +108,7 @@ export const useSettingsStore = defineStore('settings', {
 
     getUserId() {
       const userStore = useUserStore()
-      return userStore.user.uid
+      return userStore.user ? userStore.user.uid : null
     },
 
     handleError(message, error) {

@@ -43,7 +43,16 @@ const newCategory = ref('')
 
 // Load settings when the component mounts
 onMounted(() => {
-  settingsStore.loadSettings()
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      userStore.setUser(user)
+      await settingsStore.loadSettings() // Загружаем настройки только после аутентификации
+    } else {
+      userStore.clearUser()
+      // Возможно, очистить или сбросить настройки, если пользователь не аутентифицирован
+    }
+    userStore.loading = false
+  })
 })
 
 const addUnit = async () => {
