@@ -139,7 +139,8 @@ onMounted(async () => {
       height: fit-content;
       flex: 0 1 calc((100% / var(--columns-x-large)) - var(--gap));
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      justify-content: space-between;
       gap: 20px;
       padding: 14px 10px;
       border: 1px solid var(--accent-color);
