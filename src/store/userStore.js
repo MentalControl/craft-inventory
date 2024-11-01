@@ -12,6 +12,8 @@ export const useUserStore = defineStore('user', () => {
 
   const clearUser = () => {
     user.value = null
+    localStorage.removeItem('unitOptions')
+    localStorage.removeItem('categoryOptions')
   }
 
   const initAuthState = () => {

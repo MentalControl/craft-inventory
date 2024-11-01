@@ -36,8 +36,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useSettingsStore } from '@/store/settingsStore'
+import { useUserStore } from '@/store/userStore'
+import { auth } from '@/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 
 const settingsStore = useSettingsStore()
+const userStore = useUserStore()
 const newUnit = ref('')
 const newCategory = ref('')
 
@@ -46,12 +50,12 @@ onMounted(() => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       userStore.setUser(user)
-      await settingsStore.loadSettings() // Загружаем настройки только после аутентификации
+      await settingsStore.loadSettings()
     } else {
       userStore.clearUser()
-      // Возможно, очистить или сбросить настройки, если пользователь не аутентифицирован
+      settingsStore.unitOptions = [] // Очистите unitOptions
+      settingsStore.categoryOptions = [] // Очистите categoryOptions
     }
-    userStore.loading = false
   })
 })
 
