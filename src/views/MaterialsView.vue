@@ -176,33 +176,32 @@ form {
 }
 
 .accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   &-item {
     border: var(--border);
-    margin-bottom: 5px;
+    overflow: hidden;
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+    &:hover {
+      transform: translateY(-4px);
+    }
   }
 
   &-header {
     background-color: #e8dcc7;
-    padding: 10px;
+    padding: 20px 14px;
     cursor: pointer;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-
-    h3 {
-      max-width: 13rem;
+    gap: 15px;
+    select {
       width: 100%;
-
-      @media (max-width: 767.98px) {
-        max-width: 10rem;
-        font-size: 18px;
-      }
     }
-  }
-
-  &-content {
-    padding: 10px;
   }
 
   &-enter-active,

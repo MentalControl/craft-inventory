@@ -15,20 +15,23 @@ const userStore = useUserStore()
 
 <template>
   <div class="home">
-    <PageHeader :title="TITLE">
-      <template #btn-action>
-        <UserButton v-if="userStore.user" />
-      </template>
-      <template #description>
-        <p>{{ DESCRIPTION }}</p>
-      </template>
-    </PageHeader>
-
-    <!-- Если идет загрузка, показываем сообщение "Загрузка..." -->
+    <!-- Если идет загрузка, показываем спиннер -->
     <div v-if="userStore.loading" class="spinner"></div>
 
-    <!-- Если пользователь не авторизован и загрузка завершена, показываем форму авторизации -->
+    <!-- Если пользователь не авторизован, показываем только форму -->
     <AuthComp v-else-if="!userStore.user" />
+
+    <!-- Если пользователь авторизован, показываем основной контент -->
+    <template v-else>
+      <PageHeader :title="TITLE">
+        <template #btn-action>
+          <UserButton />
+        </template>
+        <template #description>
+          <p>{{ DESCRIPTION }}</p>
+        </template>
+      </PageHeader>
+    </template>
   </div>
 </template>
 

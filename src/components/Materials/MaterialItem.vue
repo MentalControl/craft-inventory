@@ -150,6 +150,9 @@ li {
     justify-content: center;
     cursor: pointer;
     padding: 0;
+    svg {
+      fill: #fff;
+    }
   }
   &_item {
     display: flex;
