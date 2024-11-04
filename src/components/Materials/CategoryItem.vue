@@ -55,18 +55,25 @@ defineEmits(['toggleCategory', 'changeMaterialSort', 'removeMaterial'])
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
     h3 {
-      font-size: 1.25rem;
+      font-size: 1.35rem;
       font-weight: 600;
       color: var(--text-color);
     }
     span {
-      background: var(--main-color);
-      color: #fff;
-      padding: 0.25rem 0.75rem;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-color);
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--text-color);
       border-radius: 1rem;
-      font-size: 0.875rem;
+      border: 1px solid var(--text-color);
     }
   }
   &-content {

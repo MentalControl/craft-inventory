@@ -123,6 +123,7 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Marmelad&family=Ruslan+Display&display=swap');
 :root {
   --main-color: #c8b08f;
   --accent-color: #d4af37;
@@ -151,7 +152,9 @@ html {
 }
 
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Marmelad', sans-serif;
+  font-weight: 400;
+  font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   display: flex;
@@ -160,6 +163,21 @@ html {
   font-size: 16px;
   background: var(--bg-color);
   color: var(--text-color);
+}
+button {
+  font-family: 'Marmelad', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Ruslan Display', sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 .main {
   background: var(--bg-color);

@@ -12,8 +12,8 @@ defineProps({
     <div class="top-header">
       <h1>{{ title }}</h1>
       <slot name="btn-action"></slot>
-      <slot name="description"></slot>
     </div>
+    <slot name="description"></slot>
   </header>
 </template>
 

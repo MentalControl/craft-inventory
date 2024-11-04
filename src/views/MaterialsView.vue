@@ -154,11 +154,11 @@ onMounted(async () => {
       }
 
       @media (max-width: 600px) {
-        flex: 0 1 calc((100% / var(--columns-small)) - var(--gap));
+        flex: 1 1 calc((100% / var(--columns-small)) - var(--gap));
       }
 
       @media (max-width: 400px) {
-        flex: 0 1 calc(100% - var(--gap));
+        flex: 1 1 calc(100% - var(--gap));
       }
       &.editActive {
         height: 100%;
@@ -192,7 +192,7 @@ form {
 
   &-header {
     background-color: #e8dcc7;
-    padding: 20px 14px;
+    padding: 16px 10px;
     cursor: pointer;
     display: flex;
     flex-wrap: wrap;
