@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import Notification from '@/components/Notification.vue'
 import PageHeader from '@/components/pages/PageHeader.vue'
 import { useMaterialStore } from '@/store/materialStore.js'
 import { useProductStore } from '@/store/productStore.js'
@@ -23,10 +24,14 @@ const filteredMaterials = computed(() =>
   )
 )
 
+const notificationRef = ref(null) // добавьте ref на компонент уведомлений
+
 function addMaterialToProduct(material) {
-  const existingMaterial = materialStore.getMaterialById(material.firestoreId)
-  if (!existingMaterial) {
-    console.error(`Материал с ID ${material.firestoreId} не найден.`)
+  const existingMaterial = newProduct.value.materials.find(
+    (m) => m.firestoreId === material.firestoreId
+  )
+  if (existingMaterial) {
+    notificationRef.value.addNotification(`Материал "${material.name}" уже добавлен`)
     return
   }
 
@@ -221,30 +226,31 @@ onMounted(async () => {
           :key="material.firestoreId"
           class="material-item"
         >
-          <div>
-            {{ material.name }}
-
-            <input
-              type="number"
-              v-model.number="material.quantity"
-              min="1"
-              :max="getMaxQuantity(material.firestoreId)"
-              @input="changeMaterialQuantity(material.firestoreId, material.quantity)"
-              class="form-input quantity-input"
-            />
-            {{ material.unit }}
+          {{ material.name }}
+          <div class="materials-quantity">
+            <div class="materials-input">
+              <input
+                type="number"
+                v-model.number="material.quantity"
+                min="1"
+                :max="getMaxQuantity(material.firestoreId)"
+                @input="changeMaterialQuantity(material.firestoreId, material.quantity)"
+                class="form-input quantity-input"
+              />{{ material.unit }}
+            </div>
+            <button @click="removeMaterialFromProduct(material.firestoreId)" class="btn btn-delete">
+              X
+            </button>
           </div>
-          <button @click="removeMaterialFromProduct(material.firestoreId)" class="btn btn-danger">
-            Удалить
-          </button>
           <span v-if="newProduct.materialErrors[material.firestoreId]" class="error">
             {{ newProduct.materialErrors[material.firestoreId] }}
           </span>
         </li>
       </ul>
-
-      <button @click="saveProduct" class="btn btn-success">Сохранить изделие</button>
-      <button @click="showNewProductForm = false" class="btn btn-secondary">Отменить</button>
+      <div class="control-buttons">
+        <button @click="saveProduct" class="btn btn-success">Сохранить изделие</button>
+        <button @click="showNewProductForm = false" class="btn btn-secondary">Отменить</button>
+      </div>
     </div>
 
     <ul class="product-list">
@@ -270,6 +276,7 @@ onMounted(async () => {
       </li>
     </ul>
   </div>
+  <Notification ref="notificationRef" />
 </template>
 
 <style scoped>
@@ -279,15 +286,25 @@ onMounted(async () => {
 }
 
 .new-product-form {
-  background-color: #f0f0f0;
+  background-color: var(--main-color);
   padding: 1rem;
   margin-top: 1rem;
-  border-radius: 4px;
+  border-radius: 10px;
 }
-
+.new-product-form h3 {
+  margin-bottom: 1rem;
+}
+.form-input {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
 .material-search {
   position: relative;
   margin-bottom: 1rem;
+  width: 100%;
+}
+.material-search input {
+  width: 100%;
 }
 
 .material-list {
@@ -316,10 +333,57 @@ onMounted(async () => {
 .selected-materials {
   list-style-type: none;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 1rem;
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
 }
 
-.selected-materials li {
-  margin-bottom: 0.5rem;
+.selected-materials .material-item {
+  margin: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: var(--bg-color);
+  padding: 8px;
+  border: var(--border);
+  border-radius: 10px;
+}
+
+.materials-quantity {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.materials-input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-delete {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-list {
@@ -334,8 +398,16 @@ onMounted(async () => {
   border-radius: 4px;
 }
 
+.control-buttons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
 .error {
   color: red;
   font-size: 0.9rem;
+  text-wrap-style: balance;
 }
 </style>
