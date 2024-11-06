@@ -207,7 +207,12 @@ onMounted(async () => {
       <h3>Новое изделие</h3>
       <input v-model="newProduct.name" placeholder="Название изделия" required class="form-input" />
       <div class="material-search">
-        <input v-model="searchMaterial" placeholder="Поиск материала" class="form-input" />
+        <input
+          v-model="searchMaterial"
+          placeholder="Поиск материала"
+          class="form-input"
+          @keyup.esc="searchMaterial = ''"
+        />
         <ul v-if="searchMaterial" class="material-list">
           <li
             v-for="material in filteredMaterials"
@@ -358,6 +363,7 @@ onMounted(async () => {
   margin: 0;
   flex-direction: column;
   align-items: flex-start;
+  gap: 6px;
   background-color: var(--bg-color);
   padding: 8px;
   border: var(--border);
