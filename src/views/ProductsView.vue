@@ -397,7 +397,7 @@ onMounted(async () => {
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 0.5rem;
   list-style-type: none;
-  margin-top: 1rem;
+  margin-top: 0.8rem;
   padding: 0;
   @media (max-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
