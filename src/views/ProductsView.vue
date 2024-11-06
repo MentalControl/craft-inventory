@@ -397,21 +397,18 @@ onMounted(async () => {
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 0.5rem;
   list-style-type: none;
+  margin-top: 1rem;
   padding: 0;
   @media (max-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (max-width: 576px) {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @media (max-width: 400px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(1, 1fr);
   }
 }
 
