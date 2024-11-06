@@ -170,11 +170,7 @@ button {
   font-style: normal;
 }
 h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h2 {
   font-family: 'Ruslan Display', sans-serif;
   font-weight: 400;
   font-style: normal;
@@ -186,7 +182,7 @@ h6 {
 .container {
   // width: clamp(320px, 100%, 1440px);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 14px;
   box-sizing: border-box;
 }
 

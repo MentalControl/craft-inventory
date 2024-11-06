@@ -263,12 +263,12 @@ onMounted(async () => {
         <h4 class="product-item__title">
           {{ product.name }} <span>(Повторений: {{ product.repeatCount || 0 }})</span>
         </h4>
-        <ul class="product-list__materials">
+        <ul class="product-item__materials">
           <li v-for="material in product.materials" :key="material.firestoreId">
             {{ material.name }}: {{ material.quantity }} {{ material.unit }}
           </li>
         </ul>
-        <div class="product-list__buttons">
+        <div class="product-item__buttons">
           <button @click="repeatProduct(product)" class="btn btn-primary">Повторить</button>
           <button
             @click="cancelProduct(product)"
@@ -393,15 +393,43 @@ onMounted(async () => {
 }
 
 .product-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 0.5rem;
   list-style-type: none;
   padding: 0;
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
 }
 
-.product-list > li {
-  margin-bottom: 1rem;
+.product-list .product-item {
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
   border: 1px solid #ccc;
-  padding: 1rem;
+  padding: 0.75rem;
   border-radius: 4px;
+}
+.product-list .product-item .product-item__buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
 }
 
 .control-buttons {
