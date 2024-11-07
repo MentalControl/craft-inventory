@@ -9,6 +9,10 @@ defineProps({
   to: {
     type: String,
     required: true
+  },
+  customClass: {
+    type: String,
+    default: ''
   }
 })
 </script>

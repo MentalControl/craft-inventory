@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useUserStore } from '@/store/userStore'
+import { useMaterialStore } from '@/store/materialStore'
 import AuthComp from '@/components/AuthComp.vue'
 import UserButton from '@/components/UserButton.vue'
 import PageHeader from '@/components/pages/PageHeader.vue'
@@ -11,6 +12,25 @@ const DESCRIPTION = ref(
 )
 
 const userStore = useUserStore()
+
+const materialStore = useMaterialStore()
+const lowStockMaterials = computed(() => materialStore.lowStockMaterials)
+
+const getUnitWord = (value) => {
+  if (!value) return 'единиц'
+
+  const lastDigit = value % 10
+  const lastTwoDigits = value % 100
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'единиц'
+  if (lastDigit === 1) return 'единица'
+  if (lastDigit >= 2 && lastDigit <= 4) return 'единицы'
+  return 'единиц'
+}
+
+onMounted(() => {
+  materialStore.subToMaterials()
+})
 </script>
 
 <template>
@@ -31,6 +51,22 @@ const userStore = useUserStore()
           <p>{{ DESCRIPTION }}</p>
         </template>
       </PageHeader>
+      <div v-if="lowStockMaterials && lowStockMaterials.length > 0" class="stock">
+        <span class="stock__title">Наши запасы кончаются, милорд!</span>
+        <ul class="stock__list">
+          <li v-for="material in lowStockMaterials" :key="material.id" class="stock__item">
+            <div class="stock__item__wrapper">
+              <p class="stock__item__title">
+                {{ material?.name || 'Неизвестный материал' }}:
+                <span
+                  >осталось {{ material?.quantity || 0 }}
+                  {{ getUnitWord(material?.quantity) }}</span
+                >
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
     </template>
   </div>
 </template>
@@ -53,6 +89,59 @@ const userStore = useUserStore()
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+.stock {
+  background-color: var(--bg-color);
+  border-left: 4px solid var(--accent-color);
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: var(--text-color);
+  max-width: 25rem;
+  margin-left: auto;
+  font-size: 0.95rem;
+
+  &__title {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  &__list {
+    max-height: 30rem;
+    overflow: auto;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .stock__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--accent-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &__wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    &__title {
+      font-weight: 600;
+      color: var(--text-color);
+      span {
+        color: #dc3545;
+        font-weight: 500;
+      }
+    }
   }
 }
 </style>

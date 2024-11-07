@@ -192,7 +192,7 @@ form {
 
   &-header {
     background-color: #e8dcc7;
-    padding: 16px 10px;
+    padding: 10px;
     cursor: pointer;
     display: flex;
     flex-wrap: wrap;

@@ -1,29 +1,30 @@
 <script setup>
 import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useUserStore } from './store/userStore'
+import { useUserStore } from '@/store/userStore'
+import { useMaterialStore } from '@/store/materialStore'
 import { auth } from './firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import MenuItem from '@/components/pages/MenuItem.vue'
+
 const route = useRoute()
+const userStore = useUserStore()
+const materialStore = useMaterialStore()
 
 const isHomePage = computed(() => {
   return route.path === '/'
 })
 
-const userStore = useUserStore()
-
 onMounted(() => {
-  // Добавляем слушатель состояния аутентификации
-  onAuthStateChanged(auth, (user) => {
+  // Сначала дождёмся инициализации состояния авторизации
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Если пользователь авторизован, сохраняем данные пользователя в Pinia
       userStore.setUser(user)
+      // Подписываемся на материалы только после установки пользователя
+      materialStore.subToMaterials()
     } else {
-      // Если пользователь не авторизован, очищаем состояние
       userStore.clearUser()
     }
-    // Вызываем метод для завершения загрузки
     userStore.loading = false
   })
   userStore.initAuthState()
@@ -63,7 +64,7 @@ onUnmounted(() => {
       <img v-else src="@/assets/angry_gnom.png" alt="Angry Gnom" />
     </div>
     <div class="links">
-      <MenuItem to="/">
+      <MenuItem to="/" :class="{ 'notification-dot': materialStore.lowStockMaterials.length > 0 }">
         <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="#000000">
           <path
             fill="#000000"
@@ -232,13 +233,22 @@ nav {
       margin-inline: auto;
     }
     a.menu-item {
+      position: relative;
       display: flex;
       align-self: center;
-      // &:first-child {
-      //   svg {
-      //     width: 52px;
-      //   }
-      // }
+      &.notification-dot {
+        &::after {
+          content: '';
+          position: absolute;
+          top: 0px;
+          left: 0px;
+          width: 8px;
+          height: 8px;
+          background-color: #dc3545;
+          border-radius: 50%;
+          animation: blink 1s infinite;
+        }
+      }
 
       &.router-link-exact-active {
         svg.nofill {
@@ -314,6 +324,18 @@ button {
   &:hover {
     background-color: var(--hover-color);
     box-shadow: 0 0 10px var(--accent-color);
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
   }
 }
 </style>

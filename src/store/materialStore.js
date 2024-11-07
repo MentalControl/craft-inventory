@@ -113,6 +113,9 @@ export const useMaterialStore = defineStore('material', {
   },
 
   getters: {
+    lowStockMaterials(state) {
+      return state.materials.filter((material) => material.quantity < 10)
+    },
     unitOptions() {
       const settingsStore = useSettingsStore()
       const { unitOptions } = storeToRefs(settingsStore)
