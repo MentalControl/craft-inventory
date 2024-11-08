@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { useUserStore } from '@/store/userStore'
+import { useMaterialStore } from '@/store/materialStore'
 
 const userStore = useUserStore()
 
@@ -36,6 +37,7 @@ function enableEditing() {
   errorMessage.value = ''
 }
 
+// Компонент материала
 async function updateMaterial() {
   if (!userStore.user?.uid) {
     errorMessage.value = 'User ID not available'
@@ -51,8 +53,12 @@ async function updateMaterial() {
   }
 
   try {
-    const materialRef = doc(db, `users/${userStore.user.uid}/materials`, props.material.firestoreId)
-    await updateDoc(materialRef, { quantity: newQuantity.value, unit: newUnit.value })
+    const materialStore = useMaterialStore() // Получаем экземпляр стора
+    await materialStore.updateMaterial({
+      id: props.material.firestoreId,
+      newQuantity: newQuantity.value,
+      newUnit: newUnit.value
+    })
 
     emit('updateMaterial', {
       id: props.material.firestoreId,

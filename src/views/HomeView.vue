@@ -1,7 +1,10 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/userStore'
 import { useMaterialStore } from '@/store/materialStore'
+import { useActivityStore } from '@/store/activityStore'
+
 import AuthComp from '@/components/AuthComp.vue'
 import UserButton from '@/components/UserButton.vue'
 import PageHeader from '@/components/pages/PageHeader.vue'
@@ -16,6 +19,9 @@ const userStore = useUserStore()
 const materialStore = useMaterialStore()
 const lowStockMaterials = computed(() => materialStore.lowStockMaterials)
 
+const activityStore = useActivityStore()
+const { activities } = storeToRefs(activityStore)
+
 const getUnitWord = (value) => {
   if (!value) return 'единиц'
 
@@ -29,6 +35,7 @@ const getUnitWord = (value) => {
 }
 
 onMounted(() => {
+  activityStore.fetchActivities()
   materialStore.subToMaterials()
 })
 </script>
@@ -51,21 +58,32 @@ onMounted(() => {
           <p>{{ DESCRIPTION }}</p>
         </template>
       </PageHeader>
-      <div v-if="lowStockMaterials && lowStockMaterials.length > 0" class="stock">
-        <span class="stock__title">Наши запасы кончаются, милорд!</span>
-        <ul class="stock__list">
-          <li v-for="material in lowStockMaterials" :key="material.id" class="stock__item">
-            <div class="stock__item__wrapper">
-              <p class="stock__item__title">
-                {{ material?.name || 'Неизвестный материал' }}:
-                <span
-                  >осталось {{ material?.quantity || 0 }}
-                  {{ getUnitWord(material?.quantity) }}</span
-                >
-              </p>
-            </div>
-          </li>
-        </ul>
+      <div class="content">
+        <div class="activityfeed">
+          <h2>Лента активности</h2>
+          <ul class="activityfeed__list">
+            <li class="activityfeed__item" v-for="activity in activities" :key="activity.id">
+              {{ activity.timestamp }} - {{ activity.type }}
+              <div v-if="activity.details">{{ activity.details }}</div>
+            </li>
+          </ul>
+        </div>
+        <div v-if="lowStockMaterials && lowStockMaterials.length > 0" class="stock">
+          <span class="stock__title">Наши запасы кончаются, милорд!</span>
+          <ul class="stock__list">
+            <li v-for="material in lowStockMaterials" :key="material.id" class="stock__item">
+              <div class="stock__item__wrapper">
+                <p class="stock__item__title">
+                  {{ material?.name || 'Неизвестный материал' }}:
+                  <span
+                    >осталось {{ material?.quantity || 0 }}
+                    {{ getUnitWord(material?.quantity) }}</span
+                  >
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </template>
   </div>

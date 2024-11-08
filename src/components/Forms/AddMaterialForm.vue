@@ -65,6 +65,7 @@ async function addMaterial() {
     console.error('Error adding material: ', error)
   }
 }
+
 defineExpose({ openDialog })
 </script>
 

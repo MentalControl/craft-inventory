@@ -41,14 +41,12 @@ function toggleCategory(category) {
 }
 
 const removeMaterial = (id) => {
-  materials.value = materials.value.filter((material) => material.id !== id)
+  materials.value = materials.value.filter((material) => material.firestoreId !== id)
 }
 
 const updateMaterial = async ({ id, newQuantity, newUnit }) => {
   try {
     await materialStore.updateMaterial({ id, newQuantity, newUnit })
-    const material = materials.value.find((mat) => mat.id === id)
-    if (material) Object.assign(material, { quantity: newQuantity, unit: newUnit })
   } catch (error) {
     console.error('Error updating material:', error)
   }

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { collection, addDoc, doc, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { useUserStore } from './userStore'
+import { useActivityStore } from './activityStore'
 
 export const useProductStore = defineStore('product', {
   state: () => ({
@@ -33,13 +34,21 @@ export const useProductStore = defineStore('product', {
       )
     },
     async addProduct(product) {
+      const activityStore = useActivityStore()
       const userStore = useUserStore()
       try {
+        const materialsUsed = product.materials.map((material) => ({
+          materialId: material.firestoreId,
+          name: material.name,
+          quantityUsed: material.quantity
+        }))
         const productWithUserId = {
           ...product,
           userId: userStore.user?.uid
         }
         await addDoc(collection(db, `users/${userStore.user.uid}/products`), productWithUserId)
+        const materialsInfo = materialsUsed.map((m) => `${m.name}: ${m.quantityUsed}`).join(', ')
+        activityStore.addActivity(`Создан продукт "${product.name}"`, materialsInfo)
       } catch (error) {
         console.error('Error adding product: ', error)
         throw error
@@ -74,13 +83,6 @@ export const useProductStore = defineStore('product', {
         console.error('Error removing product:', error)
         this.error = 'Error removing product: ' + error.message
         throw error
-      }
-    },
-    deleteProduct(id) {
-      const index = this.products.findIndex((p) => p.firestoreId === id)
-      if (index !== -1) {
-        this.products.splice(index, 1)
-        localStorage.setItem('products', JSON.stringify(this.products)) // Обновляем кэш
       }
     }
   },
