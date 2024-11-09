@@ -40,15 +40,21 @@ export const useProductStore = defineStore('product', {
         const materialsUsed = product.materials.map((material) => ({
           materialId: material.firestoreId,
           name: material.name,
-          quantityUsed: material.quantity
+          quantityUsed: material.quantity,
+          materialUnit: material.unit
         }))
         const productWithUserId = {
           ...product,
           userId: userStore.user?.uid
         }
         await addDoc(collection(db, `users/${userStore.user.uid}/products`), productWithUserId)
-        const materialsInfo = materialsUsed.map((m) => `${m.name}: ${m.quantityUsed}`).join(', ')
-        activityStore.addActivity(`Создан продукт "${product.name}"`, materialsInfo)
+        const materialsInfo = materialsUsed
+          .map((m) => `${m.name}: ${m.quantityUsed} ${m.materialUnit}`)
+          .join(', ')
+        activityStore.addActivity(
+          `Создан продукт: <strong>"${product.name}"</strong>`,
+          `Материалы потрачены: ${materialsInfo}`
+        )
       } catch (error) {
         console.error('Error adding product: ', error)
         throw error

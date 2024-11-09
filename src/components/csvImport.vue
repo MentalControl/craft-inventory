@@ -102,6 +102,9 @@ const importCSV = async () => {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
+  @media (max-width: 1024px) {
+    display: none;
+  }
   input {
     margin-bottom: 0;
   }

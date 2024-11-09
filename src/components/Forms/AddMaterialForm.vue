@@ -100,7 +100,7 @@ defineExpose({ openDialog })
   border-radius: 10px;
   padding: 20px;
   width: 100%;
-  max-width: 80%;
+  max-width: 90%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   background-color: white;
   margin: auto;

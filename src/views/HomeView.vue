@@ -63,13 +63,14 @@ onMounted(() => {
           <h2>Лента активности</h2>
           <ul class="activityfeed__list">
             <li class="activityfeed__item" v-for="activity in activities" :key="activity.id">
-              {{ activity.timestamp }} - {{ activity.type }}
+              {{ activity.timestamp }} -
+              <div v-html="activity.type"></div>
               <div v-if="activity.details" v-html="activity.details"></div>
             </li>
           </ul>
         </div>
         <div v-if="lowStockMaterials && lowStockMaterials.length > 0" class="stock">
-          <span class="stock__title">Наши запасы кончаются!</span>
+          <h2 class="stock__title">Наши запасы кончаются!</h2>
           <ul class="stock__list">
             <li v-for="material in lowStockMaterials" :key="material.id" class="stock__item">
               <div class="stock__item__wrapper">
@@ -120,7 +121,7 @@ onMounted(() => {
   }
   .activityfeed {
     height: 100%;
-    flex: 0 0 60%;
+    flex: 0 0 65%;
 
     padding: 1rem;
 
@@ -131,6 +132,15 @@ onMounted(() => {
     border-radius: 6px;
 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    @media (max-width: 1200px) {
+      flex: 0 0 60%;
+    }
+    h2 {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
     &__list {
       max-height: 30rem;
       height: 100%;
@@ -172,7 +182,7 @@ onMounted(() => {
 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     @media (max-width: 1200px) {
-      flex: 0 0 35%;
+      flex: 0 0 38%;
     }
     &__title {
       display: block;

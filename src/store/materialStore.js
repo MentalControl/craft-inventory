@@ -56,7 +56,7 @@ export const useMaterialStore = defineStore('material', {
         await addDoc(collection(db, `users/${userStore.user.uid}/materials`), materialWithUserId)
         activityStore.addActivity(
           'Добавлен новый материал',
-          `Материал: ${material.name}, Количество: ${material.quantity} ${unit}`
+          `Материал: <strong>${material.name}</strong>, Количество: ${material.quantity} ${unit}`
         )
       } catch (error) {
         this.setError(`Error adding material: ${error.message}`)
