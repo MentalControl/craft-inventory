@@ -108,7 +108,7 @@ export const useMaterialStore = defineStore('material', {
         if (activityDetails.length > 0) {
           activityStore.addActivity(
             'Материал обновлен',
-            `Материал: ${material.name}, ${activityDetails.join(', ')}`
+            `Материал: <strong>${material.name}</strong>, ${activityDetails.join(', ')}`
           )
         }
 
