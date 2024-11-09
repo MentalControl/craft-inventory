@@ -109,55 +109,76 @@ onMounted(() => {
     transform: rotate(360deg);
   }
 }
-.stock {
-  background-color: var(--bg-color);
-  border-left: 4px solid var(--accent-color);
-  padding: 1rem;
-  border-radius: 6px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  color: var(--text-color);
-  max-width: 25rem;
-  margin-left: auto;
-  font-size: 0.95rem;
-
-  &__title {
-    display: block;
-    font-size: 1.25rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  }
-
-  &__list {
-    max-height: 30rem;
-    overflow: auto;
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .stock__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--accent-color);
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &__wrapper {
+.content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  .activityfeed {
+    flex: 0 0 65%;
+    height: 100%;
+    &__list {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
     }
+    &__item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      div {
+        text-wrap-style: balance;
+      }
+    }
+  }
+  .stock {
+    background-color: var(--bg-color);
+    border-left: 4px solid var(--accent-color);
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+    flex: 0 0 30%;
+    font-size: 0.95rem;
+    height: 100%;
 
     &__title {
-      font-weight: 600;
-      color: var(--text-color);
-      span {
-        color: #dc3545;
-        font-weight: 500;
+      display: block;
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    &__list {
+      max-height: 30rem;
+      overflow: auto;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .stock__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--accent-color);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &__wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      &__title {
+        font-weight: 600;
+        color: var(--text-color);
+        span {
+          color: #dc3545;
+          font-weight: 500;
+        }
       }
     }
   }
