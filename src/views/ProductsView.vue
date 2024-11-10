@@ -31,7 +31,7 @@ function addMaterialToProduct(material) {
     (m) => m.firestoreId === material.firestoreId
   )
   if (existingMaterial) {
-    notificationRef.value.addNotification(`Материал "${material.name}" уже добавлен`)
+    notificationRef.value.addNotification(`Материал "${material.name}" уже добавлен`, 'error')
     return
   }
 
@@ -66,23 +66,34 @@ function changeMaterialQuantity(materialId, quantity) {
 }
 
 function validateProductMaterials(product) {
-  return product.materials.reduce((errors, material) => {
+  let hasErrors = false
+
+  for (const material of product.materials) {
     const stockMaterial = materialStore.getMaterialById(material.firestoreId)
     if (!stockMaterial) {
-      errors.push(`Материал "${material.name}" не найден в кладовке.`)
-    } else if (stockMaterial.quantity < material.quantity) {
-      errors.push(
-        `Недостаточно материала "${material.name}". Доступно: ${stockMaterial.quantity} ${stockMaterial.unit}`
+      notificationRef.value.addNotification(
+        `Материал "${material.name}" не найден в кладовке.`,
+        'error'
       )
+      hasErrors = true
+    } else if (stockMaterial.quantity < material.quantity) {
+      notificationRef.value.addNotification(
+        `Недостаточно материала "${material.name}". Доступно: ${stockMaterial.quantity} ${stockMaterial.unit}`,
+        'error'
+      )
+      hasErrors = true
     }
-    return errors
-  }, [])
+  }
+
+  return hasErrors
 }
 
 async function saveProduct() {
   const errors = validateProductMaterials(newProduct.value)
   if (errors.length > 0) {
-    alert(errors.join('\n'))
+    errors.forEach((error) => {
+      notificationRef.value.addNotification(error, 'error')
+    })
     return
   }
 
@@ -101,10 +112,14 @@ async function saveProduct() {
       await updateMaterialQuantity(material.firestoreId, newQuantity)
       materialStore.setMaterialQuantity(material.firestoreId, newQuantity)
     } else {
-      console.error(`Материал с ID ${material.firestoreId} не найден в базе данных.`)
+      notificationRef.value.addNotification(
+        `Материал с ID ${material.firestoreId} не найден в базе данных.`,
+        'error'
+      )
     }
   }
 
+  notificationRef.value.addNotification(`Продукт ${productData.name} успешно создан!`, 'success')
   resetNewProductForm()
 }
 
@@ -114,33 +129,39 @@ async function updateMaterialQuantity(materialId, newQuantity) {
 }
 
 async function repeatProduct(product) {
-  const errors = validateProductMaterials(product)
-  if (errors.length > 0) {
-    alert(errors.join('\n'))
-    return
+  if (validateProductMaterials(product)) {
+    return // Есть ошибки, уведомления уже показаны
   }
 
-  await Promise.all(
-    product.materials.map(async (material) => {
-      const currentMaterial = await getDoc(
-        doc(db, `users/${userStore.user.uid}/materials`, material.firestoreId)
-      )
-      if (currentMaterial.exists()) {
-        const newQuantity = currentMaterial.data().quantity - material.quantity
-        await updateMaterialQuantity(material.firestoreId, newQuantity)
-        materialStore.decreaseMaterialQuantity(material.firestoreId, material.quantity)
-      }
-    })
-  )
+  try {
+    await Promise.all(
+      product.materials.map(async (material) => {
+        const currentMaterial = await getDoc(
+          doc(db, `users/${userStore.user.uid}/materials`, material.firestoreId)
+        )
+        if (currentMaterial.exists()) {
+          const newQuantity = currentMaterial.data().quantity - material.quantity
+          await updateMaterialQuantity(material.firestoreId, newQuantity)
+          materialStore.decreaseMaterialQuantity(material.firestoreId, material.quantity)
+        }
+      })
+    )
 
-  product.repeatCount++
-  await updateProductInDB(product)
-  alert('Продукт успешно повторен!')
+    product.repeatCount++
+    await updateProductInDB(product)
+    notificationRef.value.addNotification(`Продукт ${product.name} успешно повторен!`, 'success')
+  } catch (error) {
+    console.error('Error in repeatProduct:', error)
+    notificationRef.value.addNotification('Произошла ошибка при повторении продукта', 'error')
+  }
 }
 
 async function cancelProduct(product) {
   if (product.repeatCount <= 0) {
-    alert('Нельзя отменить продукт, который не был повторен')
+    notificationRef.value.addNotification(
+      'Нельзя отменить продукт, который не был повторен',
+      'error'
+    )
     return
   }
 
@@ -159,11 +180,14 @@ async function cancelProduct(product) {
   if (product.repeatCount === 0) {
     await deleteProductFromDB(product)
     productStore.removeProduct(product.firestoreId)
+    notificationRef.value.addNotification(`Продукт ${product.name} успешно удален!`, 'success')
   } else {
     await updateProductInDB(product)
+    notificationRef.value.addNotification(
+      `Материалы возвращены. Осталось повторений: ${product.repeatCount}`,
+      'success'
+    )
   }
-
-  alert(`Материалы возвращены. Осталось повторений: ${product.repeatCount}`)
 }
 
 async function updateProductInDB(product) {
@@ -191,7 +215,10 @@ onMounted(async () => {
     await Promise.all([productStore.subToProducts(), materialStore.subToMaterials()])
   } catch (error) {
     console.error('Error in onMounted:', error)
-    // Добавьте здесь обработку ошибок, например, показ сообщения пользователю
+    notificationRef.value.addNotification(
+      'Ошибка при загрузке данных. Пожалуйста, обновите страницу.',
+      'error'
+    )
   }
 })
 </script>
