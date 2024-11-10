@@ -60,7 +60,7 @@ onMounted(() => {
       </PageHeader>
       <div class="content">
         <div class="activityfeed">
-          <h2>Лента активности</h2>
+          <span>Лента активности</span>
           <ul class="activityfeed__list">
             <li class="activityfeed__item" v-for="activity in activities" :key="activity.id">
               {{ activity.timestamp }} -
@@ -70,7 +70,7 @@ onMounted(() => {
           </ul>
         </div>
         <div v-if="lowStockMaterials && lowStockMaterials.length > 0" class="stock">
-          <h2 class="stock__title">Наши запасы кончаются!</h2>
+          <span class="stock__title">Наши запасы кончаются!</span>
           <ul class="stock__list">
             <li v-for="material in lowStockMaterials" :key="material.id" class="stock__item">
               <div class="stock__item__wrapper">
@@ -135,7 +135,7 @@ onMounted(() => {
     @media (max-width: 1200px) {
       flex: 0 0 60%;
     }
-    h2 {
+    span {
       display: block;
       font-size: 1.25rem;
       font-weight: bold;

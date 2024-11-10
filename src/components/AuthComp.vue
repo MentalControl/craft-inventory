@@ -48,7 +48,14 @@ const toggleAuthMode = () => {
       <form @submit.prevent="handleSubmit" class="form">
         <div class="input-group">
           <label for="email">Email</label>
-          <input id="email" v-model="email" type="email" placeholder="name@example.com" required />
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            placeholder="name@example.com"
+            autocomplete="email"
+            required
+          />
         </div>
 
         <div class="input-group">
@@ -58,8 +65,8 @@ const toggleAuthMode = () => {
             v-model="password"
             type="password"
             placeholder="••••••••"
+            autocomplete="password"
             required
-            autocomplete="off"
           />
         </div>
 
