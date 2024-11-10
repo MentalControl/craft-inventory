@@ -4,11 +4,11 @@ import { ref } from 'vue'
 const notifications = ref([])
 const maxNotifications = 3
 
-const addNotification = (message) => {
+const addNotification = (message, type = 'error') => {
   if (!message) return
 
   const id = Date.now() + Math.random()
-  notifications.value.push({ id, message })
+  notifications.value.push({ id, message, type })
 
   if (notifications.value.length > maxNotifications) {
     notifications.value.shift()
@@ -32,7 +32,7 @@ defineExpose({ addNotification })
       <div
         v-for="(notification, index) in notifications"
         :key="notification.id"
-        class="notification"
+        :class="['notification', notification.type]"
         :style="{ bottom: `${20 + index * 70}px` }"
       >
         {{ notification.message }}
@@ -41,7 +41,7 @@ defineExpose({ addNotification })
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .notifications-container {
   position: fixed;
   right: 20px;
@@ -52,13 +52,18 @@ defineExpose({ addNotification })
 }
 
 .notification {
-  background-color: #ff4d4f;
   color: white;
   padding: 10px 20px;
   border-radius: 5px;
   min-width: 200px;
   transition: all 0.3s ease;
   margin-top: 10px;
+  &.error {
+    background-color: #ff4d4f;
+  }
+  &.success {
+    background-color: #4caf50;
+  }
 }
 
 .notification-list-enter-active,
