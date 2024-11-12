@@ -8,12 +8,13 @@ export const useProductStore = defineStore('product', {
   state: () => ({
     products: JSON.parse(localStorage.getItem('products')) || [],
     loading: false,
-    error: null
+    error: null,
+    userStore: useUserStore(),
+    activityStore: useActivityStore()
   }),
   actions: {
     subToProducts() {
-      const userStore = useUserStore()
-      const productsRef = collection(db, `users/${userStore.user.uid}/products`)
+      const productsRef = collection(db, `users/${this.userStore.user.uid}/products`)
 
       this.loading = true
       onSnapshot(
@@ -34,8 +35,6 @@ export const useProductStore = defineStore('product', {
       )
     },
     async addProduct(product) {
-      const activityStore = useActivityStore()
-      const userStore = useUserStore()
       try {
         const materialsUsed = product.materials.map((material) => ({
           materialId: material.firestoreId,
@@ -45,13 +44,13 @@ export const useProductStore = defineStore('product', {
         }))
         const productWithUserId = {
           ...product,
-          userId: userStore.user?.uid
+          userId: this.userStore.user?.uid
         }
-        await addDoc(collection(db, `users/${userStore.user.uid}/products`), productWithUserId)
+        await addDoc(collection(db, `users/${this.userStore.user.uid}/products`), productWithUserId)
         const materialsInfo = materialsUsed
           .map((m) => `${m.name}: ${m.quantityUsed} ${m.materialUnit}`)
           .join(', ')
-        activityStore.addActivity(
+        this.activityStore.addActivity(
           `Создан продукт: <strong>"${product.name}"</strong>`,
           `Материалы потрачены: ${materialsInfo}`
         )
@@ -60,26 +59,9 @@ export const useProductStore = defineStore('product', {
         throw error
       }
     },
-    async updateProduct({ id, updatedData }) {
-      const userStore = useUserStore()
-      try {
-        const productRef = doc(db, `users/${userStore.user.uid}/products`, id)
-        await updateDoc(productRef, updatedData)
-
-        const index = this.products.findIndex((p) => p.firestoreId === id)
-        if (index !== -1) {
-          this.products[index] = { ...this.products[index], ...updatedData }
-          localStorage.setItem('products', JSON.stringify(this.products)) // Обновляем кэш
-        }
-      } catch (error) {
-        this.error = 'Error updating product: ' + error.message
-        throw error
-      }
-    },
     async removeProduct(productId) {
-      const userStore = useUserStore()
       try {
-        const productRef = doc(db, `users/${userStore.user.uid}/products`, productId)
+        const productRef = doc(db, `users/${this.userStore.user.uid}/products`, productId)
         await deleteDoc(productRef)
 
         // Update local state
