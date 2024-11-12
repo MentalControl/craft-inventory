@@ -62,6 +62,7 @@ export const useMaterialStore = defineStore('material', {
         this.setError(`Error adding material: ${error.message}`)
       }
     },
+
     getMaterialById(id) {
       return this.materials.find((m) => m.firestoreId === id)
     },

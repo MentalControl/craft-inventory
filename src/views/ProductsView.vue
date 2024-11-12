@@ -284,7 +284,7 @@ onMounted(async () => {
         <button @click="showNewProductForm = false" class="btn btn-secondary">Отменить</button>
       </div>
     </div>
-
+    <p v-if="productStore.products.length === 0">Мы еще ничего не создали</p>
     <ul class="product-list">
       <li v-for="product in productStore.products" :key="product.firestoreId" class="product-item">
         <h4 class="product-item__title">
