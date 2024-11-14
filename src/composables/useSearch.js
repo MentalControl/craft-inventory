@@ -7,9 +7,10 @@ export function useSearch(materials) {
 
   const filteredMaterials = computed(() => {
     if (!isSearching.value) return materials.value
-    return materials.value.filter((material) =>
-      material.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
+    return materials.value.filter((material) => {
+      // Фильтруем материалы по запросу
+      return material.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    })
   })
 
   function handleSearch(query) {

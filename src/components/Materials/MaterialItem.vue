@@ -15,6 +15,10 @@ const props = defineProps({
   unitOptions: {
     type: Array,
     required: true
+  },
+  isSearching: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -107,7 +111,10 @@ async function removeMaterial() {
   <li class="materials-list__item" :class="{ editActive: isEditing }">
     <span v-if="!isEditing" class="material_item" @click="enableEditing">
       {{ material.name }}:
-      <span class="material_quantity">{{ material.quantity }} {{ material.unit }}</span>
+      <span class="material_quantity">{{ material.quantity || 0 }} {{ material.unit }}</span>
+      <span v-if="isSearching" class="material_category">
+        (Категория: {{ material.category || 'Не указана' }})
+      </span>
     </span>
 
     <div v-else class="material_edit">

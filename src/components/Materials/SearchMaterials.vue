@@ -1,3 +1,46 @@
+<script setup>
+import { ref, computed } from 'vue'
+import MaterialItem from '@/components/Materials/MaterialItem.vue'
+
+const props = defineProps({
+  materials: {
+    type: Array,
+    required: true
+  },
+  unitOptions: {
+    type: Array,
+    required: true
+  }
+})
+const emit = defineEmits(['search', 'updateMaterial', 'remove'])
+
+const searchQuery = ref('')
+const isSearching = computed(() => searchQuery.value.length > 0)
+
+function onSearch() {
+  emit('search', searchQuery.value)
+}
+
+function removeMaterial(id) {
+  emit('remove', id)
+}
+
+const filteredMaterials = computed(() => {
+  if (!searchQuery.value) return []
+  return props.materials.filter((material) =>
+    material.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+function updateMaterial({ id, newQuantity, newUnit }) {
+  const material = props.materials.find((m) => m.id === id)
+  if (material) {
+    material.quantity = newQuantity
+    material.unit = newUnit
+  }
+}
+</script>
+
 <template>
   <div class="materials_search">
     <div class="materials_search__input">
@@ -18,6 +61,7 @@
           :key="material.id"
           :material="material"
           :unitOptions="unitOptions"
+          :isSearching="isSearching"
           @remove="removeMaterial"
           @updateMaterial="updateMaterial"
         />
@@ -28,47 +72,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, computed } from 'vue'
-import MaterialItem from '@/components/Materials/MaterialItem.vue'
-
-const props = defineProps({
-  materials: {
-    type: Array,
-    required: true
-  },
-  unitOptions: {
-    type: Array,
-    required: true
-  }
-})
-const emit = defineEmits(['search', 'updateMaterial', 'remove'])
-
-function onSearch() {
-  emit('search', searchQuery.value)
-}
-
-function removeMaterial(id) {
-  emit('remove', id)
-}
-const searchQuery = ref('')
-
-const filteredMaterials = computed(() => {
-  if (!searchQuery.value) return []
-  return props.materials.filter((material) =>
-    material.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-})
-
-function updateMaterial({ id, newQuantity, newUnit }) {
-  const material = props.materials.find((m) => m.id === id)
-  if (material) {
-    material.quantity = newQuantity
-    material.unit = newUnit
-  }
-}
-</script>
 
 <style scoped lang="scss">
 .materials_search {
