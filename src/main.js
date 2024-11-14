@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import '@/assets/styles/index.scss'
 import { useUserStore } from './store/userStore'
 import settingsPlugin from './plugins/settings'
 
