@@ -20,6 +20,13 @@ export const useMaterialStore = defineStore('material', {
         material.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     },
+    getMaxQuantity(materialId) {
+      const material = this.getMaterialById(materialId)
+      return material ? material.quantity : 0
+    },
+    getMaterialById(id) {
+      return this.materials.find((m) => m.firestoreId === id)
+    },
     subToMaterials() {
       const userStore = useUserStore()
       if (!userStore.user || !userStore.user.uid) {
@@ -68,10 +75,6 @@ export const useMaterialStore = defineStore('material', {
       } catch (error) {
         this.setError(`Error adding material: ${error.message}`)
       }
-    },
-
-    async getMaterialById(id) {
-      return this.materials.find((m) => m.firestoreId === id)
     },
 
     async updateMaterial({ id, newQuantity, newUnit }) {

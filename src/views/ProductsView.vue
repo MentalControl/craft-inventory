@@ -15,14 +15,6 @@ const productStore = useProductStore()
 const userStore = useUserStore()
 
 const showNewProductForm = ref(false)
-// const
-// const searchMaterial = ref('')
-
-// const filteredMaterials = computed(() =>
-//   materialStore.materials.filter((material) =>
-//     material.name.toLowerCase().includes(searchMaterial.value.toLowerCase())
-//   )
-// )
 
 const notificationRef = ref(null)
 
@@ -33,24 +25,14 @@ function removeMaterialFromProduct(materialId) {
   )
 }
 
-function changeMaterialQuantity(materialId, quantity) {
-  const material = newProduct.value.materials.find((m) => m.firestoreId === materialId)
-  if (material) {
-    material.quantity = quantity
-    const stockMaterial = materialStore.getMaterialById(materialId)
-    if (stockMaterial && stockMaterial.quantity < quantity) {
-      newProduct.value.materialErrors[materialId] =
-        `Недостаточно материала "${material.name}". Доступно: ${stockMaterial.quantity} ${stockMaterial.unit}`
-    } else {
-      delete newProduct.value.materialErrors[materialId]
-    }
-  }
-}
+// function getMaxQuantity(materialId) {
+//   const material = materialStore.getMaterialById(materialId)
+//   return material ? material.quantity : 0
+// }
 
-function getMaxQuantity(materialId) {
-  const material = materialStore.getMaterialById(materialId)
-  return material ? material.quantity : 0
-}
+const sortedProducts = computed(() => {
+  return productStore.products.sort((a, b) => b.createdAt - a.createdAt)
+})
 
 function handleAddMaterialToProduct(material) {
   productStore.addMaterialToProduct(material)
@@ -62,7 +44,11 @@ onMounted(async () => {
   })
 
   try {
-    await Promise.all([productStore.subToProducts(), materialStore.subToMaterials()])
+    await Promise.all([
+      productStore.subToProducts(),
+      materialStore.subToMaterials(),
+      productStore.showNewProductForm()
+    ])
   } catch (error) {
     console.error('Error in onMounted:', error)
     notificationRef.value.addNotification(
@@ -76,11 +62,11 @@ onMounted(async () => {
 <template>
   <PageHeader :title="TITLE">
     <template #btn-action>
-      <button @click="showNewProductForm = true">Добавить изделие</button>
+      <button @click="productStore.showNewProductForm = true">Добавить изделие</button>
     </template>
   </PageHeader>
   <div class="products">
-    <div v-if="showNewProductForm" class="new-product-form">
+    <div v-if="productStore.showNewProductForm" class="new-product-form">
       <h3>Новое изделие</h3>
       <input
         v-model="productStore.newProduct.name"
@@ -120,8 +106,10 @@ onMounted(async () => {
                 type="number"
                 v-model.number="material.quantity"
                 min="1"
-                :max="getMaxQuantity(material.firestoreId)"
-                @input="changeMaterialQuantity(material.firestoreId, material.quantity)"
+                :max="materialStore.getMaxQuantity(material.firestoreId)"
+                @input="
+                  productStore.changeMaterialQuantity(material.firestoreId, material.quantity)
+                "
                 class="form-input quantity-input"
               />{{ material.unit }}
             </div>
@@ -130,7 +118,7 @@ onMounted(async () => {
             </button>
           </div>
           <span v-if="productStore.newProduct.materialErrors[material.firestoreId]" class="error">
-            {{ newProduct.materialErrors[material.firestoreId] }}
+            {{ productStore.newProduct.materialErrors[material.firestoreId] }}
           </span>
         </li>
       </ul>
@@ -141,7 +129,7 @@ onMounted(async () => {
     </div>
     <p v-if="productStore.products.length === 0">Мы еще ничего не создали</p>
     <ul class="product-list">
-      <li v-for="product in productStore.products" :key="product.firestoreId" class="product-item">
+      <li v-for="product in sortedProducts" :key="product.firestoreId" class="product-item">
         <h4 class="product-item__title">
           {{ product.name }} <span>(Повторений: {{ product.repeatCount || 0 }})</span>
         </h4>

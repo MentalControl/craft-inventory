@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { collection, addDoc, doc, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  onSnapshot,
+  deleteDoc,
+  query,
+  orderBy
+} from 'firebase/firestore'
 import { db } from '@/firebase'
 import { useMaterialStore } from './materialStore'
 import { useUserStore } from './userStore'
@@ -13,17 +21,23 @@ export const useProductStore = defineStore('product', {
     notify: null,
     loading: false,
     error: null,
-    userStore: useUserStore(),
-    activityStore: useActivityStore()
+    showNewProductForm: false
+    // userStore: useUserStore(),
+    // activityStore: useActivityStore()
   }),
   actions: {
+    showNewProductForm(callback) {
+      this.showNewProductForm = callback
+    },
     setNotificationFunction(fn) {
       this.notify = fn
     },
     subToProducts() {
-      const productsRef = collection(db, `users/${this.userStore.user.uid}/products`)
+      const userStore = useUserStore()
+      const productsRef = collection(db, `users/${userStore.user.uid}/products`)
 
       this.loading = true
+      const productsQuery = query(productsRef, orderBy('createdAt', 'desc'))
       onSnapshot(
         productsRef,
         (snapshot) => {
@@ -62,46 +76,60 @@ export const useProductStore = defineStore('product', {
       })
       materialStore.searchMaterial = ''
     },
+    async changeMaterialQuantity(materialId, quantity) {
+      const materialStore = useMaterialStore()
+      const material = this.newProduct.materials.find((m) => m.firestoreId === materialId)
+      if (material) {
+        material.quantity = quantity
+        const stockMaterial = materialStore.getMaterialById(materialId)
+        if (stockMaterial && stockMaterial.quantity < quantity) {
+          this.newProduct.materialErrors[materialId] =
+            `Недостаточно материала "${material.name}". Доступно: ${stockMaterial.quantity} ${stockMaterial.unit}`
+        } else {
+          delete this.newProduct.materialErrors[materialId]
+        }
+      }
+    },
     async saveProduct() {
       const materialStore = useMaterialStore()
 
-      const errors = await this.validateProductMaterials(this.newProduct.value)
-      if (errors.length > 0) {
-        errors.forEach((error) => {
-          notificationRef.value.addNotification(error, 'error')
-        })
+      if (!this.newProduct || !this.newProduct.materials.length) {
+        this.notify && this.notify('Добавьте материалы к продукту', 'error')
+        return
+      }
+
+      const errors = await this.validateProductMaterials(this.newProduct)
+      if (errors) {
         return
       }
 
       const productData = {
-        name: newProduct.value.name,
-        materials: newProduct.value.materials,
-        repeatCount: 1
+        name: this.newProduct.name,
+        materials: this.newProduct.materials,
+        repeatCount: 1,
+        createdAt: new Date()
       }
 
       await this.addProduct(productData)
 
-      for (const material of newProduct.value.materials) {
+      for (const material of this.newProduct.materials) {
         const stockMaterial = materialStore.getMaterialById(material.firestoreId)
         if (stockMaterial) {
           const newQuantity = stockMaterial.quantity - material.quantity
           await this.updateMaterialQuantity(material.firestoreId, newQuantity)
           materialStore.setMaterialQuantity(material.firestoreId, newQuantity)
         } else {
-          notificationRef.value.addNotification(
-            `Материал с ID ${material.firestoreId} не найден в базе данных.`,
-            'error'
-          )
+          this.notify &&
+            this.notify(`Материал с ID ${material.firestoreId} не найден в базе данных.`, 'error')
         }
       }
 
-      notificationRef.value.addNotification(
-        `Продукт ${productData.name} успешно создан!`,
-        'success'
-      )
+      this.notify && this.notify(`Продукт ${productData.name} успешно создан!`, 'success')
       this.resetNewProductForm()
     },
     async addProduct(product) {
+      const userStore = useUserStore()
+      const activityStore = useActivityStore()
       try {
         const materialsUsed = product.materials.map((material) => ({
           materialId: material.firestoreId,
@@ -111,13 +139,13 @@ export const useProductStore = defineStore('product', {
         }))
         const productWithUserId = {
           ...product,
-          userId: this.userStore.user?.uid
+          userId: userStore.user?.uid
         }
-        await addDoc(collection(db, `users/${this.userStore.user.uid}/products`), productWithUserId)
+        await addDoc(collection(db, `users/${userStore.user.uid}/products`), productWithUserId)
         const materialsInfo = materialsUsed
           .map((m) => `${m.name}: ${m.quantityUsed} ${m.materialUnit}`)
           .join(', ')
-        this.activityStore.addActivity(
+        activityStore.addActivity(
           `Создан продукт: <strong>"${product.name}"</strong>`,
           `Материалы потрачены: ${materialsInfo}`
         )
@@ -181,9 +209,11 @@ export const useProductStore = defineStore('product', {
     },
 
     async updateProduct({ id, updatedData }) {
+      const userStore = useUserStore()
+      const activityStore = useActivityStore()
       console.log('Updating product with ID:', id) // Добавьте этот лог
       try {
-        const productRef = doc(db, `users/${this.userStore.user.uid}/products`, id)
+        const productRef = doc(db, `users/${userStore.user.uid}/products`, id)
         await updateDoc(productRef, updatedData)
 
         const index = this.products.findIndex((p) => p.firestoreId === id)
@@ -191,7 +221,7 @@ export const useProductStore = defineStore('product', {
           this.products[index] = { ...this.products[index], ...updatedData }
           localStorage.setItem('products', JSON.stringify(this.products)) // Обновляем кэш
         }
-        this.activityStore.addActivity(
+        activityStore.addActivity(
           `Изделие обновлено: <strong>"${product.name}"</strong>`,
           `Материалы потрачены: ${materialsInfo}`
         )
@@ -202,8 +232,9 @@ export const useProductStore = defineStore('product', {
       }
     },
     async removeProduct(productId) {
+      const userStore = useUserStore()
       try {
-        const productRef = doc(db, `users/${this.userStore.user.uid}/products`, productId)
+        const productRef = doc(db, `users/${userStore.user.uid}/products`, productId)
         await deleteDoc(productRef)
 
         // Update local state
@@ -217,12 +248,10 @@ export const useProductStore = defineStore('product', {
     },
 
     async validateProductMaterials(product) {
-      console.log('Переданный продукт:', product) // Логируем сам объект продукта
-      console.log('Проверяем материалы продукта:', product.materials) // Логируем массив материалов
-
       if (!product || !product.materials) {
         console.error('Ошибка: продукт или материалы не найдены')
-        return false // Возвращаем false, если продукт или его материалы не определены
+        this.notify && this.notify('Ошибка: продукт или материалы не найдены', 'error')
+        return true
       }
 
       let hasErrors = false
@@ -300,12 +329,9 @@ export const useProductStore = defineStore('product', {
       const materialRef = doc(db, `users/${userStore.user.uid}/materials`, materialId)
       await updateDoc(materialRef, { quantity: newQuantity })
     },
-    async resetNewProductForm() {
-      newProduct.value = { name: '', materials: [], materialErrors: {} }
-      showNewProductForm.value = false
+    resetNewProductForm() {
+      this.newProduct = { name: '', materials: [], materialErrors: {} }
+      this.showNewProductForm = false
     }
-  },
-  resetNewProductForm() {
-    this.newProduct = { name: '', materials: [], materialErrors: {} }
   }
 })
