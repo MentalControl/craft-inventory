@@ -125,6 +125,7 @@ onUnmounted(() => {
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Marmelad&family=Ruslan+Display&display=swap');
+
 :root {
   --main-color: #c8b08f;
   --accent-color: #d4af37;
