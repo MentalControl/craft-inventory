@@ -1,4 +1,5 @@
 import { defineStore, storeToRefs } from 'pinia'
+import { ref } from 'vue'
 import { collection, addDoc, doc, updateDoc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { useUserStore } from './userStore'
@@ -8,11 +9,17 @@ import { useActivityStore } from './activityStore'
 export const useMaterialStore = defineStore('material', {
   state: () => ({
     materials: JSON.parse(localStorage.getItem('materials')) || [],
+    searchMaterial: ref(''),
     loading: false,
     error: null
   }),
 
   actions: {
+    getFilteredMaterials(searchQuery) {
+      return this.materials.filter((material) =>
+        material.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    },
     subToMaterials() {
       const userStore = useUserStore()
       if (!userStore.user || !userStore.user.uid) {
@@ -63,7 +70,7 @@ export const useMaterialStore = defineStore('material', {
       }
     },
 
-    getMaterialById(id) {
+    async getMaterialById(id) {
       return this.materials.find((m) => m.firestoreId === id)
     },
 
@@ -167,6 +174,13 @@ export const useMaterialStore = defineStore('material', {
   },
 
   getters: {
+    filteredMaterials(state) {
+      return state.materials.filter(
+        (material) =>
+          material.quantity > 0 && // Исключаем материалы с количеством 0
+          material.name.toLowerCase().includes(state.searchMaterial.toLowerCase())
+      )
+    },
     lowStockMaterials(state) {
       return state.materials.filter((material) => material.quantity < 10)
     },
