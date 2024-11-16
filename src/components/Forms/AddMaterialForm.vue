@@ -90,7 +90,7 @@ defineExpose({ openDialog })
       </select>
       <button type="submit">{{ addButton }}</button>
     </form>
-    <button @click="closeDialog">Передюмаля</button>
+    <button @click="closeDialog">Сворачиваем лавочку</button>
   </dialog>
 </template>
 
