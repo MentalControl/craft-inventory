@@ -189,14 +189,14 @@ form {
   }
 
   &-header {
-    background-color: #e8dcc7;
-    padding: 10px;
-    cursor: pointer;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
+    background-color: #e8dcc7;
+    padding: 10px;
+    cursor: pointer;
     select {
       width: 100%;
     }

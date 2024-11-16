@@ -43,6 +43,10 @@ const toggleAuthMode = () => {
         <p class="subtitle">
           {{ isLogin ? 'Войдите в ваш аккаунт' : 'Введите данные для регистрации' }}
         </p>
+        <span class="test-acc">
+          Тестовый аккаунт:
+          <p>admin@admin.com : admin123</p>
+        </span>
       </div>
 
       <form @submit.prevent="handleSubmit" class="form">
@@ -130,18 +134,23 @@ const toggleAuthMode = () => {
 
 .card-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 
   h2 {
     color: var(--text-color);
-    font-size: 1.875rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
   }
 
   .subtitle {
     color: var(--button-color);
-    font-size: 0.875rem;
+  }
+  .test-acc {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+    color: red;
   }
 }
 

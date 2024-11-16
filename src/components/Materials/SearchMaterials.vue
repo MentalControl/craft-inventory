@@ -99,8 +99,8 @@ function updateMaterial({ id, newQuantity, newUnit }) {
 .search-list {
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
   gap: var(--gap);
   row-gap: 25px;
 }
