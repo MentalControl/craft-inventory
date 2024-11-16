@@ -3,6 +3,7 @@ import {
   collection,
   addDoc,
   doc,
+  getDoc,
   updateDoc,
   onSnapshot,
   deleteDoc,
@@ -146,8 +147,8 @@ export const useProductStore = defineStore('product', {
           .map((m) => `${m.name}: ${m.quantityUsed} ${m.materialUnit}`)
           .join(', ')
         activityStore.addActivity(
-          `Создан продукт: <strong>"${product.name}"</strong>`,
-          `Материалы потрачены: ${materialsInfo}`
+          `<strong style="color:green">Создан продукт: "${product.name}"</strong>`,
+          `<span style="color:red">Материалы потрачены: ${materialsInfo}</span>`
         )
       } catch (error) {
         console.error('Error adding product: ', error)
@@ -155,18 +156,21 @@ export const useProductStore = defineStore('product', {
       }
     },
     async cancelProduct(product) {
-      let hasErrors = false
       const materialStore = useMaterialStore()
-      const notify = this.notify || useNotify() // если notify не задано в контексте компонента, используем глобальное уведомление
+      const activityStore = useActivityStore()
+
+      let hasErrors = false
 
       // Проверяем, можно ли отменить продукт
       if (product.repeatCount <= 0) {
-        notify && notify('Нельзя отменить продукт, который не был повторен', 'error')
+        this.notify && this.notify('Нельзя отменить продукт, который не был повторен', 'error')
         hasErrors = true
         return hasErrors
       }
 
       try {
+        const returnedMaterialsInfo = []
+
         // Возвращаем материалы
         await Promise.all(
           product.materials.map(async (material) => {
@@ -176,14 +180,29 @@ export const useProductStore = defineStore('product', {
                 const newQuantity = currentMaterial.quantity + material.quantity
                 await this.updateMaterialQuantity(material.firestoreId, newQuantity)
                 materialStore.setMaterialQuantity(material.firestoreId, newQuantity)
+
+                // Добавляем информацию о возвращённом материале
+                returnedMaterialsInfo.push(
+                  `${material.name}: ${material.quantity} ${material.unit}`
+                )
               }
             } catch (materialError) {
               console.error('Ошибка при обработке материала:', materialError)
-              notify && notify('Ошибка при обработке материала: ' + materialError.message, 'error')
+              this.notify &&
+                this.notify('Ошибка при обработке материала: ' + materialError.message, 'error')
               hasErrors = true
             }
           })
         )
+        // Формируем строку с возвращенными материалами
+        const returnedMaterialsText = returnedMaterialsInfo.join(', ')
+
+        // Добавляем запись в активности
+        activityStore.addActivity(
+          `<strong style="color: red">Отмена изделия: "${product.name}"</strong>`,
+          `<span style="color: green">Материалы возвращены: ${returnedMaterialsText}</span>`
+        )
+
         // Обновляем количество повторений
         product.repeatCount--
 
@@ -191,12 +210,18 @@ export const useProductStore = defineStore('product', {
           // Если повторений больше нет, удаляем продукт
           await this.deleteProductFromDB(product)
           this.removeProduct(product.firestoreId)
-          notify && notify(`Продукт ${product.name} успешно удален!`, 'success')
+          activityStore.addActivity(
+            `<strong style="color: red">Изделие "${product.name} испарилось"</strong>`
+          )
+          this.notify && this.notify(`Продукт ${product.name} успешно удален!`, 'success')
         } else {
           // Если повторения остались, обновляем продукт
           await this.updateProductInDB(product)
-          notify &&
-            notify(`Материалы возвращены. Осталось повторений: ${product.repeatCount}`, 'success')
+          this.notify &&
+            this.notify(
+              `Материалы возвращены. Осталось повторений: ${product.repeatCount}`,
+              'success'
+            )
         }
       } catch (error) {
         // Обработка ошибок
@@ -207,7 +232,6 @@ export const useProductStore = defineStore('product', {
 
       return hasErrors
     },
-
     async updateProduct({ id, updatedData }) {
       const userStore = useUserStore()
       const activityStore = useActivityStore()
@@ -246,7 +270,65 @@ export const useProductStore = defineStore('product', {
         throw error
       }
     },
+    async repeatProduct(product) {
+      let hasErrors = false
+      const materialStore = useMaterialStore()
+      const userStore = useUserStore()
+      const activityStore = useActivityStore()
 
+      if (await this.validateProductMaterials(product)) {
+        return // Есть ошибки, уведомления уже показаны
+      }
+
+      try {
+        const materialsInfo = []
+
+        await Promise.all(
+          product.materials.map(async (material) => {
+            const currentMaterial = await getDoc(
+              doc(db, `users/${userStore.user.uid}/materials`, material.firestoreId)
+            )
+            if (currentMaterial.exists()) {
+              const newQuantity = currentMaterial.data().quantity - material.quantity
+              await this.updateMaterialQuantity(material.firestoreId, newQuantity)
+              materialStore.decreaseMaterialQuantity(material.firestoreId, material.quantity)
+
+              materialsInfo.push(`${material.name}: ${material.quantity} ${material.unit}`)
+            }
+          })
+        )
+
+        product.repeatCount++
+        await this.updateProductInDB(product)
+
+        const materialsUsedText = materialsInfo.join(', ')
+
+        activityStore.addActivity(
+          `<strong style="color: green">Изделие повторено: "${product.name}"</strong>`,
+          `<span style="color: red">Материалы потрачены: ${materialsUsedText}</span>`
+        )
+        this.notify && this.notify(`Продукт ${product.name} успешно повторен!`, 'success')
+        hasErrors = true
+      } catch (error) {
+        console.error('Error in repeatProduct:', error)
+        this.notify && this.notify('Произошла ошибка при повторении продукта', 'error')
+
+        hasErrors = true
+      }
+      return hasErrors
+    },
+    async updateProductInDB(product) {
+      const userStore = useUserStore()
+
+      const productRef = doc(db, `users/${userStore.user.uid}/products`, product.firestoreId)
+      await updateDoc(productRef, { repeatCount: product.repeatCount })
+    },
+    async deleteProductFromDB(product) {
+      const userStore = useUserStore()
+
+      const productRef = doc(db, `users/${userStore.user.uid}/products`, product.firestoreId)
+      await deleteDoc(productRef)
+    },
     async validateProductMaterials(product) {
       if (!product || !product.materials) {
         console.error('Ошибка: продукт или материалы не найдены')
@@ -273,55 +355,6 @@ export const useProductStore = defineStore('product', {
       }
 
       return hasErrors
-    },
-    async repeatProduct(product) {
-      let hasErrors = false
-      const materialStore = useMaterialStore()
-      const userStore = useUserStore()
-
-      if (this.validateProductMaterials(product)) {
-        return // Есть ошибки, уведомления уже показаны
-      }
-
-      try {
-        console.log('Что то пошло')
-        await Promise.all(
-          product.materials.map(async (material) => {
-            const currentMaterial = await getDoc(
-              doc(db, `users/${userStore.user.uid}/materials`, material.firestoreId)
-            )
-            if (currentMaterial.exists()) {
-              const newQuantity = currentMaterial.data().quantity - material.quantity
-              await this.updateMaterialQuantity(material.firestoreId, newQuantity)
-              materialStore.decreaseMaterialQuantity(material.firestoreId, material.quantity)
-            }
-          })
-        )
-
-        product.repeatCount++
-        await this.updateProductInDB(product)
-        this.notify && this.notify(`Продукт ${product.name} успешно повторен!`, 'success')
-        hasErrors = true
-      } catch (error) {
-        console.error('Error in repeatProduct:', error)
-        this.notify && this.notify('Произошла ошибка при повторении продукта', 'error')
-
-        hasErrors = true
-      }
-      return hasErrors
-    },
-
-    async updateProductInDB(product) {
-      const userStore = useUserStore()
-
-      const productRef = doc(db, `users/${userStore.user.uid}/products`, product.firestoreId)
-      await updateDoc(productRef, { repeatCount: product.repeatCount })
-    },
-    async deleteProductFromDB(product) {
-      const userStore = useUserStore()
-
-      const productRef = doc(db, `users/${userStore.user.uid}/products`, product.firestoreId)
-      await deleteDoc(productRef)
     },
     async updateMaterialQuantity(materialId, newQuantity) {
       const userStore = useUserStore()
