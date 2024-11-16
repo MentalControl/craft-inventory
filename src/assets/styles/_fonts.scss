@@ -1,0 +1,35 @@
+@use './mixins' as *;
+
+h1 {
+  @include fluid-text(22, 42);
+}
+
+h2 {
+  @include fluid-text(20, 36);
+}
+
+h3 {
+  @include fluid-text(18, 32);
+}
+
+h4 {
+  @include fluid-text(16, 28);
+}
+
+h5 {
+  @include fluid-text(14, 24);
+}
+
+h6 {
+  @include fluid-text(12, 20);
+}
+
+p,
+span,
+div {
+  @include fluid-text(14, 16);
+}
+
+button {
+  @include fluid-text(14, 18);
+}

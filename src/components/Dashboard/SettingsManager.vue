@@ -99,6 +99,7 @@ const removeCategory = async (category) => {
   }
   .input-group {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--gap);
     margin-bottom: 15px;
     input {
@@ -117,6 +118,9 @@ const removeCategory = async (category) => {
       border-radius: 4px;
       cursor: pointer;
       transition: background-color 0.3s;
+      @media (max-width: 767.98px) {
+        flex: 1;
+      }
       &:hover {
         background-color: var(--hover-color);
       }

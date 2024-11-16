@@ -129,13 +129,13 @@ onMounted(async () => {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
     gap: var(--gap);
 
     &__item {
       height: fit-content;
-      flex: 0 1 calc((100% / var(--columns-x-large)) - var(--gap));
+      /* flex: 0 1 calc((100% / var(--columns-x-large)) - var(--gap)); */
       display: flex;
       flex-direction: row;
       justify-content: space-between;
@@ -144,7 +144,7 @@ onMounted(async () => {
       border: 1px solid var(--accent-color);
       border-radius: 5px;
       box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      @media (max-width: 1135px) {
+      /* @media (max-width: 1135px) {
         flex: 0 1 calc((100% / var(--columns-large)) - var(--gap));
       }
       @media (max-width: 900px) {
@@ -157,7 +157,7 @@ onMounted(async () => {
 
       @media (max-width: 400px) {
         flex: 1 1 calc(100% - var(--gap));
-      }
+      } */
       &.editActive {
         height: 100%;
       }

@@ -58,7 +58,6 @@ defineEmits(['toggleCategory', 'changeMaterialSort', 'removeMaterial'])
     align-items: center;
     width: 100%;
     h3 {
-      font-size: 1.35rem;
       font-weight: 600;
       color: var(--text-color);
     }

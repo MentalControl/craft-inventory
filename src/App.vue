@@ -189,6 +189,8 @@ h2 {
 }
 
 nav {
+  position: sticky;
+  top: 0;
   width: 100%;
   max-width: 80px;
   height: 100dvh;
@@ -199,6 +201,7 @@ nav {
   gap: 25px;
   @media (max-width: 991.98px) {
     position: fixed;
+    top: auto;
     bottom: 0;
     flex: none;
     flex-direction: row;
