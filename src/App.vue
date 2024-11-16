@@ -60,8 +60,8 @@ onUnmounted(() => {
 <template>
   <nav>
     <div class="logo">
-      <img v-if="isHomePage" src="@/assets/happy_gnom.png" alt="Happy Gnom" />
-      <img v-else src="@/assets/angry_gnom.png" alt="Angry Gnom" />
+      <img v-if="isHomePage" src="@/assets/close.png" alt="Happy Gnom" />
+      <img v-else src="@/assets/open.png" alt="Angry Gnom" />
     </div>
     <div class="links">
       <MenuItem to="/" :class="{ 'notification-dot': materialStore.lowStockMaterials.length > 0 }">
@@ -190,7 +190,7 @@ h2 {
 
 nav {
   width: 100%;
-  max-width: 60px;
+  max-width: 80px;
   height: 100dvh;
   padding-inline: 10px;
   display: flex;

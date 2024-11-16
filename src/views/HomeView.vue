@@ -61,6 +61,7 @@ onMounted(() => {
       <div class="content">
         <div class="activityfeed">
           <span>Лента активности</span>
+          <p v-if="activities.length === 0">Ничего еще не было сделано, ёмаё</p>
           <ul class="activityfeed__list">
             <li class="activityfeed__item" v-for="activity in activities" :key="activity.id">
               {{ activity.timestamp }} -

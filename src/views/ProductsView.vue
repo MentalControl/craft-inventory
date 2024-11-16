@@ -4,17 +4,11 @@ import Notification from '@/components/Notification.vue'
 import PageHeader from '@/components/pages/PageHeader.vue'
 import { useMaterialStore } from '@/store/materialStore.js'
 import { useProductStore } from '@/store/productStore.js'
-import { useUserStore } from '@/store/userStore'
-import { db } from '@/firebase'
-import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore'
 
 const TITLE = 'Кузница Великих Изделий'
 
 const materialStore = useMaterialStore()
 const productStore = useProductStore()
-const userStore = useUserStore()
-
-const showNewProductForm = ref(false)
 
 const notificationRef = ref(null)
 
@@ -44,11 +38,8 @@ onMounted(async () => {
   })
 
   try {
-    await Promise.all([
-      productStore.subToProducts(),
-      materialStore.subToMaterials(),
-      productStore.showNewProductForm()
-    ])
+    await Promise.all([productStore.subToProducts(), materialStore.subToMaterials()])
+    productStore.showNewProductForm = false
   } catch (error) {
     console.error('Error in onMounted:', error)
     notificationRef.value.addNotification(
