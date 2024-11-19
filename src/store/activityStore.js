@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 
 export const useActivityStore = defineStore('activity', {
   state: () => ({
-    activities: []
+    activities: JSON.parse(localStorage.getItem('activities')) || []
   }),
   actions: {
     async addActivity(type, details = '') {
@@ -43,6 +43,7 @@ export const useActivityStore = defineStore('activity', {
           }))
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
         this.activities = activitiesData
+        localStorage.setItem('activities', JSON.stringify(activitiesData))
       } catch (error) {
         console.log('Error fetching activities:', error)
       }
